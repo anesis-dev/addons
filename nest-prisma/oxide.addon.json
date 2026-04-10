@@ -1,0 +1,145 @@
+{
+  "$schema": "https://oxide-server-maksym-zhuk8433-w6h7le9s.leapcell.dev/schema/oxide.addon.schema.json",
+  "schema_version": "1",
+  "id": "nest-prisma",
+  "name": "Nest Prisma",
+  "version": "0.1.0",
+  "description": "Adds Prisma ORM (PostgreSQL) to a NestJS project and provides a custom resource generator that replaces `nest g res` — no tests, real DB queries.",
+  "author": "oxide-cli",
+  "requires": [],
+  "inputs": [],
+  "detect": [],
+  "variants": [
+    {
+      "when": null,
+      "commands": [
+        {
+          "name": "install",
+          "description": "Sets up Prisma ORM with PostgreSQL in the NestJS project",
+          "once": true,
+          "requires_commands": [],
+          "inputs": [],
+          "steps": [
+            {
+              "type": "replace",
+              "target": { "type": "file", "file": "package.json" },
+              "find": "\"dependencies\": {",
+              "replace": "\"dependencies\": {\n    \"@prisma/client\": \"^6.6.0\",\n    \"@nestjs/mapped-types\": \"^2.1.0\",",
+              "if_not_found": "skip"
+            },
+            {
+              "type": "replace",
+              "target": { "type": "file", "file": "package.json" },
+              "find": "\"devDependencies\": {",
+              "replace": "\"devDependencies\": {\n    \"prisma\": \"^6.6.0\",",
+              "if_not_found": "skip"
+            },
+            {
+              "type": "replace",
+              "target": { "type": "file", "file": "package.json" },
+              "find": "\"scripts\": {",
+              "replace": "\"scripts\": {\n    \"db:generate\": \"prisma generate\",\n    \"db:push\": \"prisma db push\",\n    \"db:migrate\": \"prisma migrate dev\",\n    \"db:studio\": \"prisma studio\",",
+              "if_not_found": "skip"
+            },
+            {
+              "type": "create",
+              "path": "prisma/schema.prisma",
+              "content": "// This is your Prisma schema file.\n// Learn more: https://pris.ly/d/prisma-schema\n\ngenerator client {\n  provider = \"prisma-client-js\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n",
+              "if_exists": "skip"
+            },
+            {
+              "type": "create",
+              "path": ".env.example",
+              "content": "DATABASE_URL=postgres://user:password@localhost:5432/dbname\n",
+              "if_exists": "skip"
+            },
+            {
+              "type": "create",
+              "path": "src/prisma/prisma.service.ts",
+              "content": "import { Injectable, OnModuleInit } from '@nestjs/common';\nimport { PrismaClient } from '@prisma/client';\n\n@Injectable()\nexport class PrismaService extends PrismaClient implements OnModuleInit {\n  async onModuleInit() {\n    await this.$connect();\n  }\n}\n"
+            },
+            {
+              "type": "create",
+              "path": "src/prisma/prisma.module.ts",
+              "content": "import { Global, Module } from '@nestjs/common';\nimport { PrismaService } from './prisma.service';\n\n@Global()\n@Module({\n  providers: [PrismaService],\n  exports: [PrismaService],\n})\nexport class PrismaModule {}\n"
+            },
+            {
+              "type": "inject",
+              "target": { "type": "file", "file": "src/app.module.ts" },
+              "content": "import { PrismaModule } from './prisma/prisma.module';",
+              "after": "// oxide:top-imports",
+              "if_not_found": "error"
+            },
+            {
+              "type": "inject",
+              "target": { "type": "file", "file": "src/app.module.ts" },
+              "content": "\t\tPrismaModule,",
+              "before": "\t\t// oxide:module-imports",
+              "if_not_found": "error"
+            }
+          ]
+        },
+        {
+          "name": "generate",
+          "description": "Generates a NestJS resource (module, controller, service, DTOs) backed by Prisma — no tests, real DB queries",
+          "once": false,
+          "requires_commands": ["install"],
+          "inputs": [
+            {
+              "name": "resource_name",
+              "type": "text",
+              "description": "Resource name in kebab-case (e.g. user, blog-post)",
+              "required": true
+            }
+          ],
+          "steps": [
+            {
+              "type": "append",
+              "target": { "type": "file", "file": "prisma/schema.prisma" },
+              "content": "\n// TODO: add your fields and run `npm run db:generate`\nmodel {{ resource_name_pascal }} {\n  id        Int      @id @default(autoincrement())\n  createdAt DateTime @default(now()) @map(\"created_at\")\n  updatedAt DateTime @updatedAt @map(\"updated_at\")\n\n  @@map(\"{{ resource_name_snake }}\")\n}\n"
+            },
+            {
+              "type": "create",
+              "path": "src/{{ resource_name_kebab }}/{{ resource_name_kebab }}.service.ts",
+              "content": "import { Injectable, NotFoundException } from '@nestjs/common';\nimport { PrismaService } from '../prisma/prisma.service';\nimport { Create{{ resource_name_pascal }}Dto } from './dto/create-{{ resource_name_kebab }}.dto';\nimport { Update{{ resource_name_pascal }}Dto } from './dto/update-{{ resource_name_kebab }}.dto';\n\n@Injectable()\nexport class {{ resource_name_pascal }}Service {\n  constructor(private readonly prisma: PrismaService) {}\n\n  findAll() {\n    return this.prisma.{{ resource_name_camel }}.findMany();\n  }\n\n  async findOne(id: number) {\n    const item = await this.prisma.{{ resource_name_camel }}.findUnique({ where: { id } });\n    if (!item) throw new NotFoundException(`{{ resource_name_pascal }} #${id} not found`);\n    return item;\n  }\n\n  create(dto: Create{{ resource_name_pascal }}Dto) {\n    return this.prisma.{{ resource_name_camel }}.create({ data: dto });\n  }\n\n  async update(id: number, dto: Update{{ resource_name_pascal }}Dto) {\n    try {\n      return await this.prisma.{{ resource_name_camel }}.update({ where: { id }, data: dto });\n    } catch {\n      throw new NotFoundException(`{{ resource_name_pascal }} #${id} not found`);\n    }\n  }\n\n  async remove(id: number) {\n    try {\n      await this.prisma.{{ resource_name_camel }}.delete({ where: { id } });\n    } catch {\n      throw new NotFoundException(`{{ resource_name_pascal }} #${id} not found`);\n    }\n  }\n}\n"
+            },
+            {
+              "type": "create",
+              "path": "src/{{ resource_name_kebab }}/{{ resource_name_kebab }}.controller.ts",
+              "content": "import {\n  Controller,\n  Get,\n  Post,\n  Body,\n  Patch,\n  Param,\n  Delete,\n  ParseIntPipe,\n} from '@nestjs/common';\nimport { {{ resource_name_pascal }}Service } from './{{ resource_name_kebab }}.service';\nimport { Create{{ resource_name_pascal }}Dto } from './dto/create-{{ resource_name_kebab }}.dto';\nimport { Update{{ resource_name_pascal }}Dto } from './dto/update-{{ resource_name_kebab }}.dto';\n\n@Controller('{{ resource_name_kebab }}')\nexport class {{ resource_name_pascal }}Controller {\n  constructor(private readonly {{ resource_name_camel }}Service: {{ resource_name_pascal }}Service) {}\n\n  @Post()\n  create(@Body() dto: Create{{ resource_name_pascal }}Dto) {\n    return this.{{ resource_name_camel }}Service.create(dto);\n  }\n\n  @Get()\n  findAll() {\n    return this.{{ resource_name_camel }}Service.findAll();\n  }\n\n  @Get(':id')\n  findOne(@Param('id', ParseIntPipe) id: number) {\n    return this.{{ resource_name_camel }}Service.findOne(id);\n  }\n\n  @Patch(':id')\n  update(\n    @Param('id', ParseIntPipe) id: number,\n    @Body() dto: Update{{ resource_name_pascal }}Dto,\n  ) {\n    return this.{{ resource_name_camel }}Service.update(id, dto);\n  }\n\n  @Delete(':id')\n  remove(@Param('id', ParseIntPipe) id: number) {\n    return this.{{ resource_name_camel }}Service.remove(id);\n  }\n}\n"
+            },
+            {
+              "type": "create",
+              "path": "src/{{ resource_name_kebab }}/{{ resource_name_kebab }}.module.ts",
+              "content": "import { Module } from '@nestjs/common';\nimport { {{ resource_name_pascal }}Controller } from './{{ resource_name_kebab }}.controller';\nimport { {{ resource_name_pascal }}Service } from './{{ resource_name_kebab }}.service';\n\n@Module({\n  controllers: [{{ resource_name_pascal }}Controller],\n  providers: [{{ resource_name_pascal }}Service],\n})\nexport class {{ resource_name_pascal }}Module {}\n"
+            },
+            {
+              "type": "create",
+              "path": "src/{{ resource_name_kebab }}/dto/create-{{ resource_name_kebab }}.dto.ts",
+              "content": "export class Create{{ resource_name_pascal }}Dto {}\n"
+            },
+            {
+              "type": "create",
+              "path": "src/{{ resource_name_kebab }}/dto/update-{{ resource_name_kebab }}.dto.ts",
+              "content": "import { PartialType } from '@nestjs/mapped-types';\nimport { Create{{ resource_name_pascal }}Dto } from './create-{{ resource_name_kebab }}.dto';\n\nexport class Update{{ resource_name_pascal }}Dto extends PartialType(Create{{ resource_name_pascal }}Dto) {}\n"
+            },
+            {
+              "type": "inject",
+              "target": { "type": "file", "file": "src/app.module.ts" },
+              "content": "import { {{ resource_name_pascal }}Module } from './{{ resource_name_kebab }}/{{ resource_name_kebab }}.module';",
+              "after": "// oxide:top-imports",
+              "if_not_found": "error"
+            },
+            {
+              "type": "inject",
+              "target": { "type": "file", "file": "src/app.module.ts" },
+              "content": "\t\t{{ resource_name_pascal }}Module,",
+              "before": "\t\t// oxide:module-imports",
+              "if_not_found": "error"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

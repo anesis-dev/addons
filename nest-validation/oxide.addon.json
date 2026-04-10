@@ -1,0 +1,49 @@
+{
+  "$schema": "https://oxide-server-maksym-zhuk8433-w6h7le9s.leapcell.dev/schema/oxide.addon.schema.json",
+  "schema_version": "1",
+  "id": "nest-validation",
+  "name": "Nest Validation",
+  "version": "0.1.0",
+  "description": "Adds class-validator + class-transformer with a global ValidationPipe to a NestJS project",
+  "author": "oxide-cli",
+  "requires": [],
+  "inputs": [],
+  "detect": [],
+  "variants": [
+    {
+      "when": null,
+      "commands": [
+        {
+          "name": "install",
+          "description": "Installs class-validator + class-transformer and sets up a global ValidationPipe in main.ts",
+          "once": true,
+          "requires_commands": [],
+          "inputs": [],
+          "steps": [
+            {
+              "type": "replace",
+              "target": { "type": "file", "file": "package.json" },
+              "find": "\"dependencies\": {",
+              "replace": "\"dependencies\": {\n    \"class-validator\": \"^0.14.1\",\n    \"class-transformer\": \"^0.5.1\",",
+              "if_not_found": "skip"
+            },
+            {
+              "type": "inject",
+              "target": { "type": "file", "file": "src/main.ts" },
+              "content": "import { ValidationPipe } from '@nestjs/common';",
+              "after": "from './app.module'",
+              "if_not_found": "error"
+            },
+            {
+              "type": "inject",
+              "target": { "type": "file", "file": "src/main.ts" },
+              "content": "  app.useGlobalPipes(\n    new ValidationPipe({ whitelist: true, transform: true, forbidNonWhitelisted: true }),\n  );",
+              "before": "await app.listen",
+              "if_not_found": "error"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

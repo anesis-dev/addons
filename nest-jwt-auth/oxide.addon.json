@@ -1,0 +1,301 @@
+{
+  "$schema": "https://oxide-server-maksym-zhuk8433-w6h7le9s.leapcell.dev/schema/oxide.addon.schema.json",
+  "schema_version": "1",
+  "id": "nest-jwt-auth",
+  "name": "Nest JWT Auth",
+  "version": "0.1.0",
+  "description": "Adds JWT authentication to a NestJS project: AuthModule, JwtAuthGuard, @CurrentUser() decorator, login + register endpoints. Detects Drizzle or Prisma and wires up user storage automatically.",
+  "author": "oxide-cli",
+  "requires": [],
+  "inputs": [],
+  "detect": [
+    {
+      "id": "with-drizzle",
+      "rules": [
+        { "type": "file_exists", "file": "src/db/drizzle.service.ts" }
+      ],
+      "match": "all"
+    },
+    {
+      "id": "with-prisma",
+      "rules": [
+        { "type": "file_exists", "file": "src/prisma/prisma.service.ts" }
+      ],
+      "match": "all"
+    }
+  ],
+  "variants": [
+    {
+      "when": "with-drizzle",
+      "commands": [
+        {
+          "name": "install",
+          "description": "Sets up JWT auth using Drizzle ORM for user storage",
+          "once": true,
+          "requires_commands": [],
+          "inputs": [],
+          "steps": [
+            {
+              "type": "replace",
+              "target": { "type": "file", "file": "package.json" },
+              "find": "\"dependencies\": {",
+              "replace": "\"dependencies\": {\n    \"@nestjs/jwt\": \"^10.2.0\",\n    \"@nestjs/passport\": \"^10.0.3\",\n    \"passport\": \"^0.7.0\",\n    \"passport-jwt\": \"^4.0.1\",\n    \"bcryptjs\": \"^2.4.3\",",
+              "if_not_found": "skip"
+            },
+            {
+              "type": "replace",
+              "target": { "type": "file", "file": "package.json" },
+              "find": "\"devDependencies\": {",
+              "replace": "\"devDependencies\": {\n    \"@types/passport-jwt\": \"^4.0.1\",\n    \"@types/bcryptjs\": \"^2.4.6\",",
+              "if_not_found": "skip"
+            },
+            {
+              "type": "append",
+              "target": { "type": "file", "file": ".env.example" },
+              "content": "JWT_SECRET=your-super-secret-key-change-in-production\nJWT_EXPIRES_IN=7d\n"
+            },
+            {
+              "type": "create",
+              "path": "src/auth/users.schema.ts",
+              "content": "import { pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';\n\nexport const usersTable = pgTable('users', {\n  id: serial('id').primaryKey(),\n  email: text('email').notNull().unique(),\n  passwordHash: text('password_hash').notNull(),\n  createdAt: timestamp('created_at').defaultNow().notNull(),\n});\n\nexport type User = typeof usersTable.$inferSelect;\n",
+              "if_exists": "skip"
+            },
+            {
+              "type": "create",
+              "path": "src/auth/strategies/jwt.strategy.ts",
+              "content": "import { Injectable } from '@nestjs/common';\nimport { PassportStrategy } from '@nestjs/passport';\nimport { ExtractJwt, Strategy } from 'passport-jwt';\n\nexport type JwtPayload = {\n  sub: number;\n  email: string;\n};\n\n@Injectable()\nexport class JwtStrategy extends PassportStrategy(Strategy) {\n  constructor() {\n    super({\n      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),\n      ignoreExpiration: false,\n      secretOrKey: process.env.JWT_SECRET!,\n    });\n  }\n\n  async validate(payload: JwtPayload): Promise<JwtPayload> {\n    return payload;\n  }\n}\n"
+            },
+            {
+              "type": "create",
+              "path": "src/auth/guards/jwt-auth.guard.ts",
+              "content": "import { Injectable } from '@nestjs/common';\nimport { AuthGuard } from '@nestjs/passport';\n\n@Injectable()\nexport class JwtAuthGuard extends AuthGuard('jwt') {}\n"
+            },
+            {
+              "type": "create",
+              "path": "src/auth/decorators/current-user.decorator.ts",
+              "content": "import { createParamDecorator, ExecutionContext } from '@nestjs/common';\nimport type { JwtPayload } from '../strategies/jwt.strategy';\n\nexport const CurrentUser = createParamDecorator(\n  (_data: unknown, ctx: ExecutionContext): JwtPayload => {\n    const request = ctx.switchToHttp().getRequest();\n    return request.user as JwtPayload;\n  },\n);\n"
+            },
+            {
+              "type": "create",
+              "path": "src/auth/dto/login.dto.ts",
+              "content": "export class LoginDto {\n  email: string;\n  password: string;\n}\n"
+            },
+            {
+              "type": "create",
+              "path": "src/auth/dto/register.dto.ts",
+              "content": "export class RegisterDto {\n  email: string;\n  password: string;\n}\n"
+            },
+            {
+              "type": "create",
+              "path": "src/auth/auth.service.ts",
+              "content": "import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';\nimport { JwtService } from '@nestjs/jwt';\nimport { eq } from 'drizzle-orm';\nimport * as bcrypt from 'bcryptjs';\nimport { DrizzleService } from '../db/drizzle.service';\nimport { usersTable } from './users.schema';\nimport type { JwtPayload } from './strategies/jwt.strategy';\n\n@Injectable()\nexport class AuthService {\n  constructor(\n    private readonly drizzle: DrizzleService,\n    private readonly jwt: JwtService,\n  ) {}\n\n  async register(email: string, password: string): Promise<{ access_token: string }> {\n    const [existing] = await this.drizzle.db\n      .select({ id: usersTable.id })\n      .from(usersTable)\n      .where(eq(usersTable.email, email))\n      .limit(1);\n\n    if (existing) throw new ConflictException('Email already in use');\n\n    const passwordHash = await bcrypt.hash(password, 10);\n    const [user] = await this.drizzle.db\n      .insert(usersTable)\n      .values({ email, passwordHash })\n      .returning({ id: usersTable.id, email: usersTable.email });\n\n    return { access_token: this.sign({ sub: user.id, email: user.email }) };\n  }\n\n  async login(email: string, password: string): Promise<{ access_token: string }> {\n    const [user] = await this.drizzle.db\n      .select()\n      .from(usersTable)\n      .where(eq(usersTable.email, email))\n      .limit(1);\n\n    if (!user || !(await bcrypt.compare(password, user.passwordHash))) {\n      throw new UnauthorizedException('Invalid credentials');\n    }\n\n    return { access_token: this.sign({ sub: user.id, email: user.email }) };\n  }\n\n  sign(payload: JwtPayload): string {\n    return this.jwt.sign(payload);\n  }\n}\n"
+            },
+            {
+              "type": "create",
+              "path": "src/auth/auth.controller.ts",
+              "content": "import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';\nimport { AuthService } from './auth.service';\nimport { LoginDto } from './dto/login.dto';\nimport { RegisterDto } from './dto/register.dto';\n\n@Controller('auth')\nexport class AuthController {\n  constructor(private readonly authService: AuthService) {}\n\n  @Post('register')\n  register(@Body() dto: RegisterDto) {\n    return this.authService.register(dto.email, dto.password);\n  }\n\n  @Post('login')\n  @HttpCode(HttpStatus.OK)\n  login(@Body() dto: LoginDto) {\n    return this.authService.login(dto.email, dto.password);\n  }\n}\n"
+            },
+            {
+              "type": "create",
+              "path": "src/auth/auth.module.ts",
+              "content": "import { Module } from '@nestjs/common';\nimport { JwtModule } from '@nestjs/jwt';\nimport { PassportModule } from '@nestjs/passport';\nimport { AuthController } from './auth.controller';\nimport { AuthService } from './auth.service';\nimport { JwtStrategy } from './strategies/jwt.strategy';\n\n@Module({\n  imports: [\n    PassportModule,\n    JwtModule.register({\n      secret: process.env.JWT_SECRET,\n      signOptions: { expiresIn: process.env.JWT_EXPIRES_IN ?? '7d' },\n    }),\n  ],\n  controllers: [AuthController],\n  providers: [AuthService, JwtStrategy],\n  exports: [AuthService],\n})\nexport class AuthModule {}\n"
+            },
+            {
+              "type": "inject",
+              "target": { "type": "file", "file": "src/app.module.ts" },
+              "content": "import { AuthModule } from './auth/auth.module';",
+              "after": "// oxide:top-imports",
+              "if_not_found": "error"
+            },
+            {
+              "type": "inject",
+              "target": { "type": "file", "file": "src/app.module.ts" },
+              "content": "\t\tAuthModule,",
+              "before": "\t\t// oxide:module-imports",
+              "if_not_found": "error"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "when": "with-prisma",
+      "commands": [
+        {
+          "name": "install",
+          "description": "Sets up JWT auth using Prisma for user storage",
+          "once": true,
+          "requires_commands": [],
+          "inputs": [],
+          "steps": [
+            {
+              "type": "replace",
+              "target": { "type": "file", "file": "package.json" },
+              "find": "\"dependencies\": {",
+              "replace": "\"dependencies\": {\n    \"@nestjs/jwt\": \"^10.2.0\",\n    \"@nestjs/passport\": \"^10.0.3\",\n    \"passport\": \"^0.7.0\",\n    \"passport-jwt\": \"^4.0.1\",\n    \"bcryptjs\": \"^2.4.3\",",
+              "if_not_found": "skip"
+            },
+            {
+              "type": "replace",
+              "target": { "type": "file", "file": "package.json" },
+              "find": "\"devDependencies\": {",
+              "replace": "\"devDependencies\": {\n    \"@types/passport-jwt\": \"^4.0.1\",\n    \"@types/bcryptjs\": \"^2.4.6\",",
+              "if_not_found": "skip"
+            },
+            {
+              "type": "append",
+              "target": { "type": "file", "file": ".env.example" },
+              "content": "JWT_SECRET=your-super-secret-key-change-in-production\nJWT_EXPIRES_IN=7d\n"
+            },
+            {
+              "type": "append",
+              "target": { "type": "file", "file": "prisma/schema.prisma" },
+              "content": "\nmodel User {\n  id           Int      @id @default(autoincrement())\n  email        String   @unique\n  passwordHash String   @map(\"password_hash\")\n  createdAt    DateTime @default(now()) @map(\"created_at\")\n\n  @@map(\"users\")\n}\n"
+            },
+            {
+              "type": "create",
+              "path": "src/auth/strategies/jwt.strategy.ts",
+              "content": "import { Injectable } from '@nestjs/common';\nimport { PassportStrategy } from '@nestjs/passport';\nimport { ExtractJwt, Strategy } from 'passport-jwt';\n\nexport type JwtPayload = {\n  sub: number;\n  email: string;\n};\n\n@Injectable()\nexport class JwtStrategy extends PassportStrategy(Strategy) {\n  constructor() {\n    super({\n      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),\n      ignoreExpiration: false,\n      secretOrKey: process.env.JWT_SECRET!,\n    });\n  }\n\n  async validate(payload: JwtPayload): Promise<JwtPayload> {\n    return payload;\n  }\n}\n"
+            },
+            {
+              "type": "create",
+              "path": "src/auth/guards/jwt-auth.guard.ts",
+              "content": "import { Injectable } from '@nestjs/common';\nimport { AuthGuard } from '@nestjs/passport';\n\n@Injectable()\nexport class JwtAuthGuard extends AuthGuard('jwt') {}\n"
+            },
+            {
+              "type": "create",
+              "path": "src/auth/decorators/current-user.decorator.ts",
+              "content": "import { createParamDecorator, ExecutionContext } from '@nestjs/common';\nimport type { JwtPayload } from '../strategies/jwt.strategy';\n\nexport const CurrentUser = createParamDecorator(\n  (_data: unknown, ctx: ExecutionContext): JwtPayload => {\n    const request = ctx.switchToHttp().getRequest();\n    return request.user as JwtPayload;\n  },\n);\n"
+            },
+            {
+              "type": "create",
+              "path": "src/auth/dto/login.dto.ts",
+              "content": "export class LoginDto {\n  email: string;\n  password: string;\n}\n"
+            },
+            {
+              "type": "create",
+              "path": "src/auth/dto/register.dto.ts",
+              "content": "export class RegisterDto {\n  email: string;\n  password: string;\n}\n"
+            },
+            {
+              "type": "create",
+              "path": "src/auth/auth.service.ts",
+              "content": "import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';\nimport { JwtService } from '@nestjs/jwt';\nimport * as bcrypt from 'bcryptjs';\nimport { PrismaService } from '../prisma/prisma.service';\nimport type { JwtPayload } from './strategies/jwt.strategy';\n\n@Injectable()\nexport class AuthService {\n  constructor(\n    private readonly prisma: PrismaService,\n    private readonly jwt: JwtService,\n  ) {}\n\n  async register(email: string, password: string): Promise<{ access_token: string }> {\n    const existing = await this.prisma.user.findUnique({ where: { email } });\n    if (existing) throw new ConflictException('Email already in use');\n\n    const passwordHash = await bcrypt.hash(password, 10);\n    const user = await this.prisma.user.create({\n      data: { email, passwordHash },\n      select: { id: true, email: true },\n    });\n\n    return { access_token: this.sign({ sub: user.id, email: user.email }) };\n  }\n\n  async login(email: string, password: string): Promise<{ access_token: string }> {\n    const user = await this.prisma.user.findUnique({ where: { email } });\n\n    if (!user || !(await bcrypt.compare(password, user.passwordHash))) {\n      throw new UnauthorizedException('Invalid credentials');\n    }\n\n    return { access_token: this.sign({ sub: user.id, email: user.email }) };\n  }\n\n  sign(payload: JwtPayload): string {\n    return this.jwt.sign(payload);\n  }\n}\n"
+            },
+            {
+              "type": "create",
+              "path": "src/auth/auth.controller.ts",
+              "content": "import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';\nimport { AuthService } from './auth.service';\nimport { LoginDto } from './dto/login.dto';\nimport { RegisterDto } from './dto/register.dto';\n\n@Controller('auth')\nexport class AuthController {\n  constructor(private readonly authService: AuthService) {}\n\n  @Post('register')\n  register(@Body() dto: RegisterDto) {\n    return this.authService.register(dto.email, dto.password);\n  }\n\n  @Post('login')\n  @HttpCode(HttpStatus.OK)\n  login(@Body() dto: LoginDto) {\n    return this.authService.login(dto.email, dto.password);\n  }\n}\n"
+            },
+            {
+              "type": "create",
+              "path": "src/auth/auth.module.ts",
+              "content": "import { Module } from '@nestjs/common';\nimport { JwtModule } from '@nestjs/jwt';\nimport { PassportModule } from '@nestjs/passport';\nimport { AuthController } from './auth.controller';\nimport { AuthService } from './auth.service';\nimport { JwtStrategy } from './strategies/jwt.strategy';\n\n@Module({\n  imports: [\n    PassportModule,\n    JwtModule.register({\n      secret: process.env.JWT_SECRET,\n      signOptions: { expiresIn: process.env.JWT_EXPIRES_IN ?? '7d' },\n    }),\n  ],\n  controllers: [AuthController],\n  providers: [AuthService, JwtStrategy],\n  exports: [AuthService],\n})\nexport class AuthModule {}\n"
+            },
+            {
+              "type": "inject",
+              "target": { "type": "file", "file": "src/app.module.ts" },
+              "content": "import { AuthModule } from './auth/auth.module';",
+              "after": "// oxide:top-imports",
+              "if_not_found": "error"
+            },
+            {
+              "type": "inject",
+              "target": { "type": "file", "file": "src/app.module.ts" },
+              "content": "\t\tAuthModule,",
+              "before": "\t\t// oxide:module-imports",
+              "if_not_found": "error"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "when": null,
+      "commands": [
+        {
+          "name": "install",
+          "description": "Sets up JWT auth infrastructure — wire up user storage manually in auth.service.ts",
+          "once": true,
+          "requires_commands": [],
+          "inputs": [],
+          "steps": [
+            {
+              "type": "replace",
+              "target": { "type": "file", "file": "package.json" },
+              "find": "\"dependencies\": {",
+              "replace": "\"dependencies\": {\n    \"@nestjs/jwt\": \"^10.2.0\",\n    \"@nestjs/passport\": \"^10.0.3\",\n    \"passport\": \"^0.7.0\",\n    \"passport-jwt\": \"^4.0.1\",",
+              "if_not_found": "skip"
+            },
+            {
+              "type": "replace",
+              "target": { "type": "file", "file": "package.json" },
+              "find": "\"devDependencies\": {",
+              "replace": "\"devDependencies\": {\n    \"@types/passport-jwt\": \"^4.0.1\",",
+              "if_not_found": "skip"
+            },
+            {
+              "type": "append",
+              "target": { "type": "file", "file": ".env.example" },
+              "content": "JWT_SECRET=your-super-secret-key-change-in-production\nJWT_EXPIRES_IN=7d\n"
+            },
+            {
+              "type": "create",
+              "path": "src/auth/strategies/jwt.strategy.ts",
+              "content": "import { Injectable } from '@nestjs/common';\nimport { PassportStrategy } from '@nestjs/passport';\nimport { ExtractJwt, Strategy } from 'passport-jwt';\n\nexport type JwtPayload = {\n  sub: number;\n  email: string;\n};\n\n@Injectable()\nexport class JwtStrategy extends PassportStrategy(Strategy) {\n  constructor() {\n    super({\n      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),\n      ignoreExpiration: false,\n      secretOrKey: process.env.JWT_SECRET!,\n    });\n  }\n\n  async validate(payload: JwtPayload): Promise<JwtPayload> {\n    return payload;\n  }\n}\n"
+            },
+            {
+              "type": "create",
+              "path": "src/auth/guards/jwt-auth.guard.ts",
+              "content": "import { Injectable } from '@nestjs/common';\nimport { AuthGuard } from '@nestjs/passport';\n\n@Injectable()\nexport class JwtAuthGuard extends AuthGuard('jwt') {}\n"
+            },
+            {
+              "type": "create",
+              "path": "src/auth/decorators/current-user.decorator.ts",
+              "content": "import { createParamDecorator, ExecutionContext } from '@nestjs/common';\nimport type { JwtPayload } from '../strategies/jwt.strategy';\n\nexport const CurrentUser = createParamDecorator(\n  (_data: unknown, ctx: ExecutionContext): JwtPayload => {\n    const request = ctx.switchToHttp().getRequest();\n    return request.user as JwtPayload;\n  },\n);\n"
+            },
+            {
+              "type": "create",
+              "path": "src/auth/dto/login.dto.ts",
+              "content": "export class LoginDto {\n  email: string;\n  password: string;\n}\n"
+            },
+            {
+              "type": "create",
+              "path": "src/auth/dto/register.dto.ts",
+              "content": "export class RegisterDto {\n  email: string;\n  password: string;\n}\n"
+            },
+            {
+              "type": "create",
+              "path": "src/auth/auth.service.ts",
+              "content": "import { Injectable, UnauthorizedException } from '@nestjs/common';\nimport { JwtService } from '@nestjs/jwt';\nimport type { JwtPayload } from './strategies/jwt.strategy';\n\n@Injectable()\nexport class AuthService {\n  constructor(private readonly jwt: JwtService) {}\n\n  // TODO: implement using your DB layer of choice\n  async register(_email: string, _password: string): Promise<{ access_token: string }> {\n    throw new UnauthorizedException('register not implemented');\n  }\n\n  async login(_email: string, _password: string): Promise<{ access_token: string }> {\n    throw new UnauthorizedException('login not implemented');\n  }\n\n  sign(payload: JwtPayload): string {\n    return this.jwt.sign(payload);\n  }\n\n  verify(token: string): JwtPayload {\n    return this.jwt.verify<JwtPayload>(token);\n  }\n}\n"
+            },
+            {
+              "type": "create",
+              "path": "src/auth/auth.controller.ts",
+              "content": "import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';\nimport { AuthService } from './auth.service';\nimport { LoginDto } from './dto/login.dto';\nimport { RegisterDto } from './dto/register.dto';\n\n@Controller('auth')\nexport class AuthController {\n  constructor(private readonly authService: AuthService) {}\n\n  @Post('register')\n  register(@Body() dto: RegisterDto) {\n    return this.authService.register(dto.email, dto.password);\n  }\n\n  @Post('login')\n  @HttpCode(HttpStatus.OK)\n  login(@Body() dto: LoginDto) {\n    return this.authService.login(dto.email, dto.password);\n  }\n}\n"
+            },
+            {
+              "type": "create",
+              "path": "src/auth/auth.module.ts",
+              "content": "import { Module } from '@nestjs/common';\nimport { JwtModule } from '@nestjs/jwt';\nimport { PassportModule } from '@nestjs/passport';\nimport { AuthController } from './auth.controller';\nimport { AuthService } from './auth.service';\nimport { JwtStrategy } from './strategies/jwt.strategy';\n\n@Module({\n  imports: [\n    PassportModule,\n    JwtModule.register({\n      secret: process.env.JWT_SECRET,\n      signOptions: { expiresIn: process.env.JWT_EXPIRES_IN ?? '7d' },\n    }),\n  ],\n  controllers: [AuthController],\n  providers: [AuthService, JwtStrategy],\n  exports: [AuthService],\n})\nexport class AuthModule {}\n"
+            },
+            {
+              "type": "inject",
+              "target": { "type": "file", "file": "src/app.module.ts" },
+              "content": "import { AuthModule } from './auth/auth.module';",
+              "after": "// oxide:top-imports",
+              "if_not_found": "error"
+            },
+            {
+              "type": "inject",
+              "target": { "type": "file", "file": "src/app.module.ts" },
+              "content": "\t\tAuthModule,",
+              "before": "\t\t// oxide:module-imports",
+              "if_not_found": "error"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
