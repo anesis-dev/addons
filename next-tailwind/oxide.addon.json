@@ -1,0 +1,48 @@
+{
+  "$schema": "https://oxide-server-maksym-zhuk8433-w6h7le9s.leapcell.dev/schema/oxide.addon.schema.json",
+  "schema_version": "1",
+  "id": "next-tailwind",
+  "name": "Next Tailwind CSS",
+  "version": "0.1.0",
+  "description": "Adds Tailwind CSS v4 to a Next.js project via @tailwindcss/postcss — no config file needed.",
+  "author": "oxide-cli",
+  "requires": [],
+  "inputs": [],
+  "detect": [],
+  "variants": [
+    {
+      "when": null,
+      "commands": [
+        {
+          "name": "install",
+          "description": "Installs Tailwind CSS v4 with @tailwindcss/postcss and injects @import into globals.css",
+          "once": true,
+          "requires_commands": [],
+          "inputs": [],
+          "steps": [
+            {
+              "type": "replace",
+              "target": { "type": "file", "file": "package.json" },
+              "find": "\"devDependencies\": {",
+              "replace": "\"devDependencies\": {\n    \"tailwindcss\": \"^4.1.4\",\n    \"@tailwindcss/postcss\": \"^4.1.4\",",
+              "if_not_found": "skip"
+            },
+            {
+              "type": "create",
+              "path": "postcss.config.mjs",
+              "content": "const config = {\n  plugins: {\n    '@tailwindcss/postcss': {},\n  },\n};\n\nexport default config;\n",
+              "if_exists": "skip"
+            },
+            {
+              "type": "inject",
+              "target": { "type": "file", "file": "src/app/globals.css" },
+              "content": "@import \"tailwindcss\";",
+              "after": "/* oxide:css-imports */",
+              "if_not_found": "skip"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

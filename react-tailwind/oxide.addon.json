@@ -1,0 +1,98 @@
+{
+  "$schema": "https://oxide-server-maksym-zhuk8433-w6h7le9s.leapcell.dev/schema/oxide.addon.schema.json",
+  "schema_version": "1",
+  "id": "react-tailwind",
+  "name": "React Tailwind CSS",
+  "version": "0.1.0",
+  "description": "Adds Tailwind CSS v4 to a React project. Uses the native Vite plugin when Vite is detected, PostCSS otherwise.",
+  "author": "oxide-cli",
+  "requires": [],
+  "inputs": [],
+  "detect": [
+    {
+      "id": "vite",
+      "match": "all",
+      "rules": [
+        {
+          "type": "json_contains",
+          "file": "package.json",
+          "key_path": "devDependencies.vite"
+        }
+      ]
+    }
+  ],
+  "variants": [
+    {
+      "when": "vite",
+      "commands": [
+        {
+          "name": "install",
+          "description": "Installs Tailwind CSS v4 with the @tailwindcss/vite plugin",
+          "once": true,
+          "requires_commands": [],
+          "inputs": [],
+          "steps": [
+            {
+              "type": "replace",
+              "target": { "type": "file", "file": "package.json" },
+              "find": "\"devDependencies\": {",
+              "replace": "\"devDependencies\": {\n    \"tailwindcss\": \"^4.1.4\",\n    \"@tailwindcss/vite\": \"^4.1.4\",",
+              "if_not_found": "skip"
+            },
+            {
+              "type": "replace",
+              "target": { "type": "file", "file": "vite.config.ts" },
+              "find": "import { defineConfig } from 'vite'",
+              "replace": "import tailwindcss from '@tailwindcss/vite'\nimport { defineConfig } from 'vite'",
+              "if_not_found": "skip"
+            },
+            {
+              "type": "replace",
+              "target": { "type": "file", "file": "vite.config.ts" },
+              "find": "plugins: [react(",
+              "replace": "plugins: [tailwindcss(), react(",
+              "if_not_found": "skip"
+            },
+            {
+              "type": "inject",
+              "target": { "type": "file", "file": "src/index.css" },
+              "content": "@import \"tailwindcss\";\n"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "when": null,
+      "commands": [
+        {
+          "name": "install",
+          "description": "Installs Tailwind CSS v4 with PostCSS",
+          "once": true,
+          "requires_commands": [],
+          "inputs": [],
+          "steps": [
+            {
+              "type": "replace",
+              "target": { "type": "file", "file": "package.json" },
+              "find": "\"devDependencies\": {",
+              "replace": "\"devDependencies\": {\n    \"tailwindcss\": \"^4.1.4\",\n    \"@tailwindcss/postcss\": \"^4.1.4\",\n    \"postcss\": \"^8.5.3\",",
+              "if_not_found": "skip"
+            },
+            {
+              "type": "create",
+              "path": "postcss.config.js",
+              "content": "export default {\n  plugins: {\n    '@tailwindcss/postcss': {},\n  },\n};\n",
+              "if_exists": "skip"
+            },
+            {
+              "type": "inject",
+              "target": { "type": "file", "file": "src/index.css" },
+              "content": "@import \"tailwindcss\";\n"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

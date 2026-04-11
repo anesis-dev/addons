@@ -1,0 +1,90 @@
+{
+  "$schema": "https://oxide-server-maksym-zhuk8433-w6h7le9s.leapcell.dev/schema/oxide.addon.schema.json",
+  "schema_version": "1",
+  "id": "react-router",
+  "name": "React Router",
+  "version": "0.1.0",
+  "description": "Adds React Router v7 to a React project — wraps the app with BrowserRouter in main.tsx and creates a starter pages structure.",
+  "author": "oxide-cli",
+  "requires": [],
+  "inputs": [],
+  "detect": [],
+  "variants": [
+    {
+      "when": null,
+      "commands": [
+        {
+          "name": "install",
+          "description": "Installs react-router v7, wraps the app with BrowserRouter, and creates a starter pages layout",
+          "once": true,
+          "requires_commands": [],
+          "inputs": [],
+          "steps": [
+            {
+              "type": "replace",
+              "target": { "type": "file", "file": "package.json" },
+              "find": "\"dependencies\": {",
+              "replace": "\"dependencies\": {\n    \"react-router\": \"^7.6.0\",",
+              "if_not_found": "skip"
+            },
+            {
+              "type": "inject",
+              "target": { "type": "file", "file": "src/main.tsx" },
+              "content": "import { BrowserRouter } from 'react-router';",
+              "after": "// oxide:top-imports",
+              "if_not_found": "error"
+            },
+            {
+              "type": "inject",
+              "target": { "type": "file", "file": "src/main.tsx" },
+              "content": "    <BrowserRouter>",
+              "after": "{/* oxide:providers-start */}",
+              "if_not_found": "error"
+            },
+            {
+              "type": "inject",
+              "target": { "type": "file", "file": "src/main.tsx" },
+              "content": "    </BrowserRouter>",
+              "before": "{/* oxide:providers-end */}",
+              "if_not_found": "error"
+            },
+            {
+              "type": "create",
+              "path": "src/pages/HomePage.tsx",
+              "content": "export function HomePage() {\n  return (\n    <main>\n      <h1>Home</h1>\n    </main>\n  );\n}\n",
+              "if_exists": "skip"
+            },
+            {
+              "type": "create",
+              "path": "src/pages/NotFoundPage.tsx",
+              "content": "export function NotFoundPage() {\n  return (\n    <main>\n      <h1>404 — Page not found</h1>\n    </main>\n  );\n}\n",
+              "if_exists": "skip"
+            }
+          ]
+        },
+        {
+          "name": "generate",
+          "description": "Generates a new page component inside src/pages/",
+          "once": false,
+          "requires_commands": ["install"],
+          "inputs": [
+            {
+              "name": "page_name",
+              "type": "text",
+              "description": "Page name in PascalCase or kebab-case (e.g. user-profile, Settings)",
+              "required": true
+            }
+          ],
+          "steps": [
+            {
+              "type": "create",
+              "path": "src/pages/{{ page_name_pascal }}Page.tsx",
+              "content": "export function {{ page_name_pascal }}Page() {\n  return (\n    <main>\n      <h1>{{ page_name_pascal }}</h1>\n    </main>\n  );\n}\n",
+              "if_exists": "ask"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
