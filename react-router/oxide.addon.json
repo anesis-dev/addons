@@ -4,7 +4,7 @@
   "id": "react-router",
   "name": "React Router",
   "version": "0.1.0",
-  "description": "Adds React Router v7 to a React project — wraps the app with BrowserRouter in main.tsx and creates a starter pages structure.",
+  "description": "Adds React Router v7 to a React project — sets up BrowserRouter, rewrites App.tsx with Routes, and provides a page generator that wires routes automatically.",
   "author": "oxide-cli",
   "requires": [],
   "inputs": [],
@@ -15,7 +15,7 @@
       "commands": [
         {
           "name": "install",
-          "description": "Installs react-router v7, wraps the app with BrowserRouter, and creates a starter pages layout",
+          "description": "Installs react-router v7, adds BrowserRouter to main.tsx, rewrites App.tsx with Routes and starter pages",
           "once": true,
           "requires_commands": [],
           "inputs": [],
@@ -59,19 +59,31 @@
               "path": "src/pages/NotFoundPage.tsx",
               "content": "export function NotFoundPage() {\n  return (\n    <main>\n      <h1>404 — Page not found</h1>\n    </main>\n  );\n}\n",
               "if_exists": "skip"
+            },
+            {
+              "type": "create",
+              "path": "src/App.tsx",
+              "content": "import { Route, Routes } from 'react-router';\nimport { HomePage } from './pages/HomePage';\nimport { NotFoundPage } from './pages/NotFoundPage';\n// oxide:page-imports\n\nfunction App() {\n  return (\n    <Routes>\n      {/* oxide:routes */}\n      <Route path=\"/\" element={<HomePage />} />\n      <Route path=\"*\" element={<NotFoundPage />} />\n    </Routes>\n  );\n}\n\nexport default App;\n",
+              "if_exists": "overwrite"
             }
           ]
         },
         {
           "name": "generate",
-          "description": "Generates a new page component inside src/pages/",
+          "description": "Generates a new page and wires it into App.tsx as a Route",
           "once": false,
           "requires_commands": ["install"],
           "inputs": [
             {
               "name": "page_name",
               "type": "text",
-              "description": "Page name in PascalCase or kebab-case (e.g. user-profile, Settings)",
+              "description": "Page name in kebab-case (e.g. about, user-profile)",
+              "required": true
+            },
+            {
+              "name": "page_path",
+              "type": "text",
+              "description": "URL path for the route (e.g. /about, /users/:id)",
               "required": true
             }
           ],
@@ -81,6 +93,20 @@
               "path": "src/pages/{{ page_name_pascal }}Page.tsx",
               "content": "export function {{ page_name_pascal }}Page() {\n  return (\n    <main>\n      <h1>{{ page_name_pascal }}</h1>\n    </main>\n  );\n}\n",
               "if_exists": "ask"
+            },
+            {
+              "type": "inject",
+              "target": { "type": "file", "file": "src/App.tsx" },
+              "content": "import { {{ page_name_pascal }}Page } from './pages/{{ page_name_pascal }}Page';",
+              "after": "// oxide:page-imports",
+              "if_not_found": "error"
+            },
+            {
+              "type": "inject",
+              "target": { "type": "file", "file": "src/App.tsx" },
+              "content": "      <Route path=\"{{ page_path }}\" element={<{{ page_name_pascal }}Page />} />",
+              "after": "{/* oxide:routes */}",
+              "if_not_found": "error"
             }
           ]
         }
