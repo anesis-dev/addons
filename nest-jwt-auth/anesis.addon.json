@@ -5,7 +5,7 @@
   "name": "Nest JWT Auth",
   "version": "0.1.0",
   "description": "Adds JWT authentication to a NestJS project: AuthModule, JwtAuthGuard, @CurrentUser() decorator, login + register endpoints. Detects Drizzle or Prisma and wires up user storage automatically.",
-  "author": "anesis-cli",
+  "author": "anesis-dev",
   "requires": [],
   "inputs": [],
   "detect": [

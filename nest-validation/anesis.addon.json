@@ -5,7 +5,7 @@
   "name": "Nest Validation",
   "version": "0.1.0",
   "description": "Adds class-validator + class-transformer with a global ValidationPipe to a NestJS project",
-  "author": "anesis-cli",
+  "author": "anesis-dev",
   "requires": [],
   "inputs": [],
   "detect": [],

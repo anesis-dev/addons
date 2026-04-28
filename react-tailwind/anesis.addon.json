@@ -5,7 +5,7 @@
   "name": "React Tailwind CSS",
   "version": "0.1.0",
   "description": "Adds Tailwind CSS v4 to a React project. Uses the native Vite plugin when Vite is detected, PostCSS otherwise.",
-  "author": "anesis-cli",
+  "author": "anesis-dev",
   "requires": [],
   "inputs": [],
   "detect": [

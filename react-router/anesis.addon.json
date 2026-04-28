@@ -5,7 +5,7 @@
   "name": "React Router",
   "version": "0.2.0",
   "description": "Adds React Router v7 to a React project — sets up BrowserRouter, rewrites App.tsx with Routes, and provides a page generator that wires routes automatically.",
-  "author": "anesis-cli",
+  "author": "anesis-dev",
   "requires": [],
   "inputs": [],
   "detect": [],

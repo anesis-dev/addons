@@ -5,7 +5,7 @@
   "name": "Next Tailwind CSS",
   "version": "0.1.0",
   "description": "Adds Tailwind CSS v4 to a Next.js project via @tailwindcss/postcss — no config file needed.",
-  "author": "anesis-cli",
+  "author": "anesis-dev",
   "requires": [],
   "inputs": [],
   "detect": [],

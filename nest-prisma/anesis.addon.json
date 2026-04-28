@@ -5,7 +5,7 @@
   "name": "Nest Prisma",
   "version": "0.1.0",
   "description": "Adds Prisma ORM (PostgreSQL) to a NestJS project and provides a custom resource generator that replaces `nest g res` — no tests, real DB queries.",
-  "author": "anesis-cli",
+  "author": "anesis-dev",
   "requires": [],
   "inputs": [],
   "detect": [],

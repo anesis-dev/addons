@@ -5,7 +5,7 @@
   "name": "React TanStack Query",
   "version": "0.1.0",
   "description": "Adds TanStack Query v5 (React Query) with a shared QueryClient, QueryClientProvider, and devtools to a React project.",
-  "author": "anesis-cli",
+  "author": "anesis-dev",
   "requires": [],
   "inputs": [],
   "detect": [],

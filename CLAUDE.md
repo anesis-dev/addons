@@ -15,7 +15,7 @@ That JSON file is the entire addon — no other files are required unless the ad
   "name": "My Addon",
   "version": "0.1.0",
   "description": "...",
-  "author": "anesis-cli",
+  "author": "anesis-dev",
   "requires": [],             // IDs of addons that must already be installed
   "inputs": [],               // manifest-level inputs (prompted once, shared across all commands)
   "detect": [],               // detection blocks → selects a variant
