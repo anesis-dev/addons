@@ -1,11 +1,11 @@
 {
-  "$schema": "https://oxide-server-maksym-zhuk8433-w6h7le9s.leapcell.dev/schema/oxide.addon.schema.json",
+  "$schema": "https://anesis-server-maksym-zhuk8433-w6h7le9s.leapcell.dev/schema/anesis.addon.schema.json",
   "schema_version": "1",
   "id": "react-tailwind",
   "name": "React Tailwind CSS",
   "version": "0.1.0",
   "description": "Adds Tailwind CSS v4 to a React project. Uses the native Vite plugin when Vite is detected, PostCSS otherwise.",
-  "author": "oxide-cli",
+  "author": "anesis-cli",
   "requires": [],
   "inputs": [],
   "detect": [

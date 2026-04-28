@@ -1,11 +1,11 @@
 {
-  "$schema": "https://oxide-server-maksym-zhuk8433-w6h7le9s.leapcell.dev/schema/oxide.addon.schema.json",
+  "$schema": "https://anesis-server-maksym-zhuk8433-w6h7le9s.leapcell.dev/schema/anesis.addon.schema.json",
   "schema_version": "1",
   "id": "react-tanstack-query",
   "name": "React TanStack Query",
   "version": "0.1.0",
   "description": "Adds TanStack Query v5 (React Query) with a shared QueryClient, QueryClientProvider, and devtools to a React project.",
-  "author": "oxide-cli",
+  "author": "anesis-cli",
   "requires": [],
   "inputs": [],
   "detect": [],
@@ -37,21 +37,21 @@
               "type": "inject",
               "target": { "type": "file", "file": "src/main.tsx" },
               "content": "import { QueryClientProvider } from '@tanstack/react-query';\nimport { ReactQueryDevtools } from '@tanstack/react-query-devtools';\nimport { queryClient } from './lib/query-client';",
-              "after": "// oxide:top-imports",
+              "after": "// anesis:top-imports",
               "if_not_found": "error"
             },
             {
               "type": "inject",
               "target": { "type": "file", "file": "src/main.tsx" },
               "content": "    <QueryClientProvider client={queryClient}>",
-              "after": "{/* oxide:providers-start */}",
+              "after": "{/* anesis:providers-start */}",
               "if_not_found": "error"
             },
             {
               "type": "inject",
               "target": { "type": "file", "file": "src/main.tsx" },
               "content": "      <ReactQueryDevtools initialIsOpen={false} />\n    </QueryClientProvider>",
-              "before": "{/* oxide:providers-end */}",
+              "before": "{/* anesis:providers-end */}",
               "if_not_found": "error"
             }
           ]

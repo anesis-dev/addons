@@ -1,11 +1,11 @@
 {
-  "$schema": "https://oxide-server-maksym-zhuk8433-w6h7le9s.leapcell.dev/schema/oxide.addon.schema.json",
+  "$schema": "https://anesis-server-maksym-zhuk8433-w6h7le9s.leapcell.dev/schema/anesis.addon.schema.json",
   "schema_version": "1",
   "id": "react-router",
   "name": "React Router",
   "version": "0.2.0",
   "description": "Adds React Router v7 to a React project — sets up BrowserRouter, rewrites App.tsx with Routes, and provides a page generator that wires routes automatically.",
-  "author": "oxide-cli",
+  "author": "anesis-cli",
   "requires": [],
   "inputs": [],
   "detect": [],
@@ -31,21 +31,21 @@
               "type": "inject",
               "target": { "type": "file", "file": "src/main.tsx" },
               "content": "import { BrowserRouter } from 'react-router';",
-              "after": "// oxide:top-imports",
+              "after": "// anesis:top-imports",
               "if_not_found": "error"
             },
             {
               "type": "inject",
               "target": { "type": "file", "file": "src/main.tsx" },
               "content": "    <BrowserRouter>",
-              "after": "{/* oxide:providers-start */}",
+              "after": "{/* anesis:providers-start */}",
               "if_not_found": "error"
             },
             {
               "type": "inject",
               "target": { "type": "file", "file": "src/main.tsx" },
               "content": "    </BrowserRouter>",
-              "before": "{/* oxide:providers-end */}",
+              "before": "{/* anesis:providers-end */}",
               "if_not_found": "error"
             },
             {
@@ -63,7 +63,7 @@
             {
               "type": "create",
               "path": "src/App.tsx",
-              "content": "import { Route, Routes } from 'react-router';\nimport { HomePage } from './pages/HomePage';\nimport { NotFoundPage } from './pages/NotFoundPage';\n// oxide:page-imports\n\nfunction App() {\n  return (\n    <Routes>\n      {/* oxide:routes */}\n      <Route path=\"/\" element={<HomePage />} />\n      <Route path=\"*\" element={<NotFoundPage />} />\n    </Routes>\n  );\n}\n\nexport default App;\n",
+              "content": "import { Route, Routes } from 'react-router';\nimport { HomePage } from './pages/HomePage';\nimport { NotFoundPage } from './pages/NotFoundPage';\n// anesis:page-imports\n\nfunction App() {\n  return (\n    <Routes>\n      {/* anesis:routes */}\n      <Route path=\"/\" element={<HomePage />} />\n      <Route path=\"*\" element={<NotFoundPage />} />\n    </Routes>\n  );\n}\n\nexport default App;\n",
               "if_exists": "overwrite"
             }
           ]
@@ -98,14 +98,14 @@
               "type": "inject",
               "target": { "type": "file", "file": "src/App.tsx" },
               "content": "import { {{ page_name_pascal }}Page } from './pages/{{ page_name_pascal }}Page';",
-              "after": "// oxide:page-imports",
+              "after": "// anesis:page-imports",
               "if_not_found": "error"
             },
             {
               "type": "inject",
               "target": { "type": "file", "file": "src/App.tsx" },
               "content": "      <Route path=\"{{ page_path }}\" element={<{{ page_name_pascal }}Page />} />",
-              "after": "{/* oxide:routes */}",
+              "after": "{/* anesis:routes */}",
               "if_not_found": "error"
             }
           ]

@@ -1,6 +1,6 @@
 # Addons — Reference for Claude Code
 
-Each addon lives in its own subdirectory: `addons/{addon-id}/oxide.addon.json`.
+Each addon lives in its own subdirectory: `addons/{addon-id}/anesis.addon.json`.
 That JSON file is the entire addon — no other files are required unless the addon uses `copy` steps (which pull files from the same directory).
 
 ---
@@ -9,13 +9,13 @@ That JSON file is the entire addon — no other files are required unless the ad
 
 ```jsonc
 {
-  "$schema": "https://oxide-server-.../schema/oxide.addon.schema.json",
+  "$schema": "https://anesis-server-.../schema/anesis.addon.schema.json",
   "schema_version": "1",
   "id": "my-addon",           // must match the directory name
   "name": "My Addon",
   "version": "0.1.0",
   "description": "...",
-  "author": "oxide-cli",
+  "author": "anesis-cli",
   "requires": [],             // IDs of addons that must already be installed
   "inputs": [],               // manifest-level inputs (prompted once, shared across all commands)
   "detect": [],               // detection blocks → selects a variant
@@ -98,7 +98,7 @@ Variant selection order: first matching `when` → then `when: null` fallback. A
 {
   "name": "install",
   "description": "...",
-  "once": true,                      // if true, CLI refuses to run it twice (tracked in oxide.lock)
+  "once": true,                      // if true, CLI refuses to run it twice (tracked in anesis.lock)
   "requires_commands": ["install"],  // commands that must have run first
   "inputs": [ ... ],                 // command-level inputs
   "steps": [ ... ]
@@ -129,9 +129,9 @@ All step types are discriminated by `"type"`. Paths are relative to the **projec
   "type": "inject",
   "target": { "type": "file", "file": "src/app.module.ts" },
   "content": "import { FooModule } from './foo/foo.module';",
-  "after": "// oxide:top-imports",    // inserts AFTER the line containing this string
+  "after": "// anesis:top-imports",    // inserts AFTER the line containing this string
   // OR:
-  "before": "// oxide:module-imports", // inserts BEFORE the line containing this string
+  "before": "// anesis:module-imports", // inserts BEFORE the line containing this string
   "if_not_found": "error"  // "warn_and_ask" (default) | "skip" | "error"
 }
 ```
@@ -165,7 +165,7 @@ Omitting both `after` and `before` prepends the content to the file.
 ```jsonc
 {
   "type": "copy",
-  "src": "files/eslint.config.js",    // relative to ~/.oxide/cache/addons/{addon-id}/
+  "src": "files/eslint.config.js",    // relative to ~/.anesis/cache/addons/{addon-id}/
   "dest": "eslint.config.js",          // relative to project root
   "if_exists": "skip"
 }
@@ -198,7 +198,7 @@ Used by `inject`, `replace`, `append`, `delete`:
 
 ---
 
-## Lock file (`oxide.lock`)
+## Lock file (`anesis.lock`)
 
 Written to the project root after each successful command run. Tracks which addons are installed and which commands have been executed. Used to enforce `once: true` and `requires_commands` constraints. Do not edit manually.
 
@@ -211,10 +211,10 @@ Written to the project root after each successful command run. Tracks which addo
 Templates must have these markers in `src/app.module.ts`:
 
 ```ts
-// oxide:top-imports    ← inject import statements after this line
+// anesis:top-imports    ← inject import statements after this line
 @Module({
   imports: [
-    // oxide:module-imports    ← inject module names before this line
+    // anesis:module-imports    ← inject module names before this line
   ],
 })
 ```
@@ -232,7 +232,7 @@ Set `"once": false` and `"requires_commands": ["install"]`. Collect a `resource_
 ## Publishing
 
 ```bash
-oxide addon publish https://github.com/org/repo
+anesis addon publish https://github.com/org/repo
 ```
 
-The repo must have `oxide.addon.json` at its root. The server reads `oxide.addon.json`, validates it, and stores it with a `commit_sha`.
+The repo must have `anesis.addon.json` at its root. The server reads `anesis.addon.json`, validates it, and stores it with a `commit_sha`.

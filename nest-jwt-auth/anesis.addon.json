@@ -1,11 +1,11 @@
 {
-  "$schema": "https://oxide-server-maksym-zhuk8433-w6h7le9s.leapcell.dev/schema/oxide.addon.schema.json",
+  "$schema": "https://anesis-server-maksym-zhuk8433-w6h7le9s.leapcell.dev/schema/anesis.addon.schema.json",
   "schema_version": "1",
   "id": "nest-jwt-auth",
   "name": "Nest JWT Auth",
   "version": "0.1.0",
   "description": "Adds JWT authentication to a NestJS project: AuthModule, JwtAuthGuard, @CurrentUser() decorator, login + register endpoints. Detects Drizzle or Prisma and wires up user storage automatically.",
-  "author": "oxide-cli",
+  "author": "anesis-cli",
   "requires": [],
   "inputs": [],
   "detect": [
@@ -104,14 +104,14 @@
               "type": "inject",
               "target": { "type": "file", "file": "src/app.module.ts" },
               "content": "import { AuthModule } from './auth/auth.module';",
-              "after": "// oxide:top-imports",
+              "after": "// anesis:top-imports",
               "if_not_found": "error"
             },
             {
               "type": "inject",
               "target": { "type": "file", "file": "src/app.module.ts" },
               "content": "\t\tAuthModule,",
-              "before": "\t\t// oxide:module-imports",
+              "before": "\t\t// anesis:module-imports",
               "if_not_found": "error"
             }
           ]
@@ -196,14 +196,14 @@
               "type": "inject",
               "target": { "type": "file", "file": "src/app.module.ts" },
               "content": "import { AuthModule } from './auth/auth.module';",
-              "after": "// oxide:top-imports",
+              "after": "// anesis:top-imports",
               "if_not_found": "error"
             },
             {
               "type": "inject",
               "target": { "type": "file", "file": "src/app.module.ts" },
               "content": "\t\tAuthModule,",
-              "before": "\t\t// oxide:module-imports",
+              "before": "\t\t// anesis:module-imports",
               "if_not_found": "error"
             }
           ]
@@ -283,14 +283,14 @@
               "type": "inject",
               "target": { "type": "file", "file": "src/app.module.ts" },
               "content": "import { AuthModule } from './auth/auth.module';",
-              "after": "// oxide:top-imports",
+              "after": "// anesis:top-imports",
               "if_not_found": "error"
             },
             {
               "type": "inject",
               "target": { "type": "file", "file": "src/app.module.ts" },
               "content": "\t\tAuthModule,",
-              "before": "\t\t// oxide:module-imports",
+              "before": "\t\t// anesis:module-imports",
               "if_not_found": "error"
             }
           ]

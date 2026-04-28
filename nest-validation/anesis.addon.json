@@ -1,11 +1,11 @@
 {
-  "$schema": "https://oxide-server-maksym-zhuk8433-w6h7le9s.leapcell.dev/schema/oxide.addon.schema.json",
+  "$schema": "https://anesis-server-maksym-zhuk8433-w6h7le9s.leapcell.dev/schema/anesis.addon.schema.json",
   "schema_version": "1",
   "id": "nest-validation",
   "name": "Nest Validation",
   "version": "0.1.0",
   "description": "Adds class-validator + class-transformer with a global ValidationPipe to a NestJS project",
-  "author": "oxide-cli",
+  "author": "anesis-cli",
   "requires": [],
   "inputs": [],
   "detect": [],
