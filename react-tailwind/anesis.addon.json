@@ -34,28 +34,40 @@
           "steps": [
             {
               "type": "replace",
-              "target": { "type": "file", "file": "package.json" },
+              "target": {
+                "type": "file",
+                "file": "package.json"
+              },
               "find": "\"devDependencies\": {",
               "replace": "\"devDependencies\": {\n    \"tailwindcss\": \"^4.1.4\",\n    \"@tailwindcss/vite\": \"^4.1.4\",",
               "if_not_found": "skip"
             },
             {
               "type": "replace",
-              "target": { "type": "file", "file": "vite.config.ts" },
+              "target": {
+                "type": "file",
+                "file": "vite.config.ts"
+              },
               "find": "import { defineConfig } from 'vite'",
               "replace": "import tailwindcss from '@tailwindcss/vite'\nimport { defineConfig } from 'vite'",
               "if_not_found": "skip"
             },
             {
               "type": "replace",
-              "target": { "type": "file", "file": "vite.config.ts" },
+              "target": {
+                "type": "file",
+                "file": "vite.config.ts"
+              },
               "find": "plugins: [react(",
               "replace": "plugins: [tailwindcss(), react(",
               "if_not_found": "skip"
             },
             {
               "type": "inject",
-              "target": { "type": "file", "file": "src/index.css" },
+              "target": {
+                "type": "file",
+                "file": "src/index.css"
+              },
               "content": "@import \"tailwindcss\";\n"
             }
           ]
@@ -74,20 +86,26 @@
           "steps": [
             {
               "type": "replace",
-              "target": { "type": "file", "file": "package.json" },
+              "target": {
+                "type": "file",
+                "file": "package.json"
+              },
               "find": "\"devDependencies\": {",
               "replace": "\"devDependencies\": {\n    \"tailwindcss\": \"^4.1.4\",\n    \"@tailwindcss/postcss\": \"^4.1.4\",\n    \"postcss\": \"^8.5.3\",",
               "if_not_found": "skip"
             },
             {
-              "type": "create",
-              "path": "postcss.config.js",
-              "content": "export default {\n  plugins: {\n    '@tailwindcss/postcss': {},\n  },\n};\n",
+              "type": "copy",
+              "src": "files/default/install/postcss.config.js",
+              "dest": "postcss.config.js",
               "if_exists": "skip"
             },
             {
               "type": "inject",
-              "target": { "type": "file", "file": "src/index.css" },
+              "target": {
+                "type": "file",
+                "file": "src/index.css"
+              },
               "content": "@import \"tailwindcss\";\n"
             }
           ]

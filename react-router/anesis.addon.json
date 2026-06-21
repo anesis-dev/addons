@@ -22,48 +22,60 @@
           "steps": [
             {
               "type": "replace",
-              "target": { "type": "file", "file": "package.json" },
+              "target": {
+                "type": "file",
+                "file": "package.json"
+              },
               "find": "\"dependencies\": {",
               "replace": "\"dependencies\": {\n    \"react-router\": \"^7.6.0\",",
               "if_not_found": "skip"
             },
             {
               "type": "inject",
-              "target": { "type": "file", "file": "src/main.tsx" },
+              "target": {
+                "type": "file",
+                "file": "src/main.tsx"
+              },
               "content": "import { BrowserRouter } from 'react-router';",
               "after": "// anesis:top-imports",
               "if_not_found": "error"
             },
             {
               "type": "inject",
-              "target": { "type": "file", "file": "src/main.tsx" },
+              "target": {
+                "type": "file",
+                "file": "src/main.tsx"
+              },
               "content": "    <BrowserRouter>",
               "after": "{/* anesis:providers-start */}",
               "if_not_found": "error"
             },
             {
               "type": "inject",
-              "target": { "type": "file", "file": "src/main.tsx" },
+              "target": {
+                "type": "file",
+                "file": "src/main.tsx"
+              },
               "content": "    </BrowserRouter>",
               "before": "{/* anesis:providers-end */}",
               "if_not_found": "error"
             },
             {
-              "type": "create",
-              "path": "src/pages/HomePage.tsx",
-              "content": "export function HomePage() {\n  return (\n    <main>\n      <h1>Home</h1>\n    </main>\n  );\n}\n",
+              "type": "copy",
+              "src": "files/install/HomePage.tsx",
+              "dest": "src/pages/HomePage.tsx",
               "if_exists": "skip"
             },
             {
-              "type": "create",
-              "path": "src/pages/NotFoundPage.tsx",
-              "content": "export function NotFoundPage() {\n  return (\n    <main>\n      <h1>404 — Page not found</h1>\n    </main>\n  );\n}\n",
+              "type": "copy",
+              "src": "files/install/NotFoundPage.tsx",
+              "dest": "src/pages/NotFoundPage.tsx",
               "if_exists": "skip"
             },
             {
-              "type": "create",
-              "path": "src/App.tsx",
-              "content": "import { Route, Routes } from 'react-router';\nimport { HomePage } from './pages/HomePage';\nimport { NotFoundPage } from './pages/NotFoundPage';\n// anesis:page-imports\n\nfunction App() {\n  return (\n    <Routes>\n      {/* anesis:routes */}\n      <Route path=\"/\" element={<HomePage />} />\n      <Route path=\"*\" element={<NotFoundPage />} />\n    </Routes>\n  );\n}\n\nexport default App;\n",
+              "type": "copy",
+              "src": "files/install/App.tsx",
+              "dest": "src/App.tsx",
               "if_exists": "overwrite"
             }
           ]
@@ -72,7 +84,9 @@
           "name": "generate",
           "description": "Generates a new page and wires it into App.tsx as a Route",
           "once": false,
-          "requires_commands": ["install"],
+          "requires_commands": [
+            "install"
+          ],
           "inputs": [
             {
               "name": "page_name",
@@ -89,21 +103,27 @@
           ],
           "steps": [
             {
-              "type": "create",
-              "path": "src/pages/{{ page_name_pascal }}Page.tsx",
-              "content": "export function {{ page_name_pascal }}Page() {\n  return (\n    <main>\n      <h1>{{ page_name_pascal }}</h1>\n    </main>\n  );\n}\n",
+              "type": "copy",
+              "src": "files/generate/Page.tsx",
+              "dest": "src/pages/{{ page_name_pascal }}Page.tsx",
               "if_exists": "ask"
             },
             {
               "type": "inject",
-              "target": { "type": "file", "file": "src/App.tsx" },
+              "target": {
+                "type": "file",
+                "file": "src/App.tsx"
+              },
               "content": "import { {{ page_name_pascal }}Page } from './pages/{{ page_name_pascal }}Page';",
               "after": "// anesis:page-imports",
               "if_not_found": "error"
             },
             {
               "type": "inject",
-              "target": { "type": "file", "file": "src/App.tsx" },
+              "target": {
+                "type": "file",
+                "file": "src/App.tsx"
+              },
               "content": "      <Route path=\"{{ page_path }}\" element={<{{ page_name_pascal }}Page />} />",
               "after": "{/* anesis:routes */}",
               "if_not_found": "error"

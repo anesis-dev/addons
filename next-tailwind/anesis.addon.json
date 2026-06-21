@@ -22,20 +22,26 @@
           "steps": [
             {
               "type": "replace",
-              "target": { "type": "file", "file": "package.json" },
+              "target": {
+                "type": "file",
+                "file": "package.json"
+              },
               "find": "\"devDependencies\": {",
               "replace": "\"devDependencies\": {\n    \"tailwindcss\": \"^4.1.4\",\n    \"@tailwindcss/postcss\": \"^4.1.4\",",
               "if_not_found": "skip"
             },
             {
-              "type": "create",
-              "path": "postcss.config.mjs",
-              "content": "const config = {\n  plugins: {\n    '@tailwindcss/postcss': {},\n  },\n};\n\nexport default config;\n",
+              "type": "copy",
+              "src": "files/install/postcss.config.mjs",
+              "dest": "postcss.config.mjs",
               "if_exists": "skip"
             },
             {
               "type": "inject",
-              "target": { "type": "file", "file": "src/app/globals.css" },
+              "target": {
+                "type": "file",
+                "file": "src/app/globals.css"
+              },
               "content": "@import \"tailwindcss\";",
               "after": "/* anesis:css-imports */",
               "if_not_found": "skip"
