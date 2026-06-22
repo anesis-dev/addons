@@ -1,0 +1,246 @@
+{
+	"$schema": "https://anesis-server-maksym-zhuk8433-w6h7le9s.leapcell.dev/schema/anesis.addon.schema.json",
+	"schema_version": "1",
+	"id": "nest-oauth",
+	"name": "Nest OAuth",
+	"version": "0.1.0",
+	"description": "Full OAuth (social login) for NestJS via Passport. `install` lays down an extensible OAuthModule that issues a JWT on success; then add providers on demand with `add-google`, `add-github`, `add-discord` — each is independent and composes into the same module.",
+	"author": "anesis-dev",
+	"requires": [],
+	"inputs": [],
+	"detect": [],
+	"variants": [
+		{
+			"when": null,
+			"commands": [
+				{
+					"name": "install",
+					"description": "Sets up the OAuth foundation: Passport + an extensible OAuthModule that signs a JWT after a successful social login",
+					"once": true,
+					"requires_commands": [],
+					"inputs": [],
+					"steps": [
+						{
+							"type": "replace",
+							"target": { "type": "file", "file": "package.json" },
+							"find": "\"dependencies\": {",
+							"replace": "\"dependencies\": {\n    \"@nestjs/passport\": \"^10.0.3\",\n    \"@nestjs/jwt\": \"^10.2.0\",\n    \"passport\": \"^0.7.0\",",
+							"if_not_found": "skip"
+						},
+						{
+							"type": "replace",
+							"target": { "type": "file", "file": "package.json" },
+							"find": "\"devDependencies\": {",
+							"replace": "\"devDependencies\": {\n    \"@types/passport\": \"^1.0.16\",",
+							"if_not_found": "skip"
+						},
+						{
+							"type": "append",
+							"target": { "type": "file", "file": ".env.example" },
+							"content": "JWT_SECRET=your-super-secret-key-change-in-production\nJWT_EXPIRES_IN=7d\n"
+						},
+						{
+							"type": "copy",
+							"src": "files/install/oauth.types.ts",
+							"dest": "src/auth/oauth/oauth.types.ts"
+						},
+						{
+							"type": "copy",
+							"src": "files/install/oauth.service.ts",
+							"dest": "src/auth/oauth/oauth.service.ts"
+						},
+						{
+							"type": "copy",
+							"src": "files/install/oauth.module.ts",
+							"dest": "src/auth/oauth/oauth.module.ts"
+						},
+						{
+							"type": "inject",
+							"target": { "type": "file", "file": "src/app.module.ts" },
+							"content": "import { OAuthModule } from './auth/oauth/oauth.module';",
+							"after": "// anesis:top-imports",
+							"if_not_found": "error"
+						},
+						{
+							"type": "inject",
+							"target": { "type": "file", "file": "src/app.module.ts" },
+							"content": "\t\tOAuthModule,",
+							"before": "\t\t// anesis:module-imports",
+							"if_not_found": "error"
+						}
+					]
+				},
+				{
+					"name": "add-google",
+					"description": "Adds Google OAuth: GET /auth/google and /auth/google/callback",
+					"once": true,
+					"requires_commands": ["install"],
+					"inputs": [],
+					"steps": [
+						{
+							"type": "replace",
+							"target": { "type": "file", "file": "package.json" },
+							"find": "\"dependencies\": {",
+							"replace": "\"dependencies\": {\n    \"passport-google-oauth20\": \"^2.0.0\",",
+							"if_not_found": "skip"
+						},
+						{
+							"type": "replace",
+							"target": { "type": "file", "file": "package.json" },
+							"find": "\"devDependencies\": {",
+							"replace": "\"devDependencies\": {\n    \"@types/passport-google-oauth20\": \"^2.0.16\",",
+							"if_not_found": "skip"
+						},
+						{
+							"type": "append",
+							"target": { "type": "file", "file": ".env.example" },
+							"content": "GOOGLE_CLIENT_ID=\nGOOGLE_CLIENT_SECRET=\nGOOGLE_CALLBACK_URL=http://localhost:3000/auth/google/callback\n"
+						},
+						{
+							"type": "copy",
+							"src": "files/providers/google/google.strategy.ts",
+							"dest": "src/auth/oauth/strategies/google.strategy.ts"
+						},
+						{
+							"type": "copy",
+							"src": "files/providers/google/google.controller.ts",
+							"dest": "src/auth/oauth/controllers/google.controller.ts"
+						},
+						{
+							"type": "inject",
+							"target": { "type": "file", "file": "src/auth/oauth/oauth.module.ts" },
+							"content": "import { GoogleStrategy } from './strategies/google.strategy';\nimport { GoogleOAuthController } from './controllers/google.controller';",
+							"after": "// anesis:oauth-imports",
+							"if_not_found": "error"
+						},
+						{
+							"type": "inject",
+							"target": { "type": "file", "file": "src/auth/oauth/oauth.module.ts" },
+							"content": "    GoogleOAuthController,",
+							"before": "    // anesis:oauth-controllers",
+							"if_not_found": "error"
+						},
+						{
+							"type": "inject",
+							"target": { "type": "file", "file": "src/auth/oauth/oauth.module.ts" },
+							"content": "    GoogleStrategy,",
+							"before": "    // anesis:oauth-providers",
+							"if_not_found": "error"
+						}
+					]
+				},
+				{
+					"name": "add-github",
+					"description": "Adds GitHub OAuth: GET /auth/github and /auth/github/callback",
+					"once": true,
+					"requires_commands": ["install"],
+					"inputs": [],
+					"steps": [
+						{
+							"type": "replace",
+							"target": { "type": "file", "file": "package.json" },
+							"find": "\"dependencies\": {",
+							"replace": "\"dependencies\": {\n    \"passport-github2\": \"^0.1.12\",",
+							"if_not_found": "skip"
+						},
+						{
+							"type": "replace",
+							"target": { "type": "file", "file": "package.json" },
+							"find": "\"devDependencies\": {",
+							"replace": "\"devDependencies\": {\n    \"@types/passport-github2\": \"^1.2.9\",",
+							"if_not_found": "skip"
+						},
+						{
+							"type": "append",
+							"target": { "type": "file", "file": ".env.example" },
+							"content": "GITHUB_CLIENT_ID=\nGITHUB_CLIENT_SECRET=\nGITHUB_CALLBACK_URL=http://localhost:3000/auth/github/callback\n"
+						},
+						{
+							"type": "copy",
+							"src": "files/providers/github/github.strategy.ts",
+							"dest": "src/auth/oauth/strategies/github.strategy.ts"
+						},
+						{
+							"type": "copy",
+							"src": "files/providers/github/github.controller.ts",
+							"dest": "src/auth/oauth/controllers/github.controller.ts"
+						},
+						{
+							"type": "inject",
+							"target": { "type": "file", "file": "src/auth/oauth/oauth.module.ts" },
+							"content": "import { GithubStrategy } from './strategies/github.strategy';\nimport { GithubOAuthController } from './controllers/github.controller';",
+							"after": "// anesis:oauth-imports",
+							"if_not_found": "error"
+						},
+						{
+							"type": "inject",
+							"target": { "type": "file", "file": "src/auth/oauth/oauth.module.ts" },
+							"content": "    GithubOAuthController,",
+							"before": "    // anesis:oauth-controllers",
+							"if_not_found": "error"
+						},
+						{
+							"type": "inject",
+							"target": { "type": "file", "file": "src/auth/oauth/oauth.module.ts" },
+							"content": "    GithubStrategy,",
+							"before": "    // anesis:oauth-providers",
+							"if_not_found": "error"
+						}
+					]
+				},
+				{
+					"name": "add-discord",
+					"description": "Adds Discord OAuth: GET /auth/discord and /auth/discord/callback",
+					"once": true,
+					"requires_commands": ["install"],
+					"inputs": [],
+					"steps": [
+						{
+							"type": "replace",
+							"target": { "type": "file", "file": "package.json" },
+							"find": "\"dependencies\": {",
+							"replace": "\"dependencies\": {\n    \"passport-discord\": \"^0.1.4\",",
+							"if_not_found": "skip"
+						},
+						{
+							"type": "append",
+							"target": { "type": "file", "file": ".env.example" },
+							"content": "DISCORD_CLIENT_ID=\nDISCORD_CLIENT_SECRET=\nDISCORD_CALLBACK_URL=http://localhost:3000/auth/discord/callback\n"
+						},
+						{
+							"type": "copy",
+							"src": "files/providers/discord/discord.strategy.ts",
+							"dest": "src/auth/oauth/strategies/discord.strategy.ts"
+						},
+						{
+							"type": "copy",
+							"src": "files/providers/discord/discord.controller.ts",
+							"dest": "src/auth/oauth/controllers/discord.controller.ts"
+						},
+						{
+							"type": "inject",
+							"target": { "type": "file", "file": "src/auth/oauth/oauth.module.ts" },
+							"content": "import { DiscordStrategy } from './strategies/discord.strategy';\nimport { DiscordOAuthController } from './controllers/discord.controller';",
+							"after": "// anesis:oauth-imports",
+							"if_not_found": "error"
+						},
+						{
+							"type": "inject",
+							"target": { "type": "file", "file": "src/auth/oauth/oauth.module.ts" },
+							"content": "    DiscordOAuthController,",
+							"before": "    // anesis:oauth-controllers",
+							"if_not_found": "error"
+						},
+						{
+							"type": "inject",
+							"target": { "type": "file", "file": "src/auth/oauth/oauth.module.ts" },
+							"content": "    DiscordStrategy,",
+							"before": "    // anesis:oauth-providers",
+							"if_not_found": "error"
+						}
+					]
+				}
+			]
+		}
+	]
+}

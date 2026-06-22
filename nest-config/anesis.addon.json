@@ -1,0 +1,60 @@
+{
+	"$schema": "https://anesis-server-maksym-zhuk8433-w6h7le9s.leapcell.dev/schema/anesis.addon.schema.json",
+	"schema_version": "1",
+	"id": "nest-config",
+	"name": "Nest Config",
+	"version": "0.1.0",
+	"description": "Adds @nestjs/config with a global, cached ConfigModule so env vars are available everywhere via ConfigService.",
+	"author": "anesis-dev",
+	"requires": [],
+	"inputs": [],
+	"detect": [],
+	"variants": [
+		{
+			"when": null,
+			"commands": [
+				{
+					"name": "install",
+					"description": "Installs @nestjs/config and registers a global ConfigModule in app.module.ts",
+					"once": true,
+					"requires_commands": [],
+					"inputs": [],
+					"steps": [
+						{
+							"type": "replace",
+							"target": { "type": "file", "file": "package.json" },
+							"find": "\"dependencies\": {",
+							"replace": "\"dependencies\": {\n    \"@nestjs/config\": \"^4.0.0\",",
+							"if_not_found": "skip"
+						},
+						{
+							"type": "create",
+							"path": ".env.example",
+							"content": "PORT=3000\nNODE_ENV=development\n",
+							"if_exists": "skip"
+						},
+						{
+							"type": "append",
+							"target": { "type": "file", "file": ".gitignore" },
+							"content": "\n# Local env files\n.env\n.env.local\n"
+						},
+						{
+							"type": "inject",
+							"target": { "type": "file", "file": "src/app.module.ts" },
+							"content": "import { ConfigModule } from '@nestjs/config';",
+							"after": "// anesis:top-imports",
+							"if_not_found": "error"
+						},
+						{
+							"type": "inject",
+							"target": { "type": "file", "file": "src/app.module.ts" },
+							"content": "\t\tConfigModule.forRoot({ isGlobal: true, cache: true }),",
+							"before": "\t\t// anesis:module-imports",
+							"if_not_found": "error"
+						}
+					]
+				}
+			]
+		}
+	]
+}

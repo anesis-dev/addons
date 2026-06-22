@@ -1,0 +1,59 @@
+{
+	"$schema": "https://anesis-server-maksym-zhuk8433-w6h7le9s.leapcell.dev/schema/anesis.addon.schema.json",
+	"schema_version": "1",
+	"id": "nest-health",
+	"name": "Nest Health",
+	"version": "0.1.0",
+	"description": "Adds @nestjs/terminus and a /health endpoint with a memory check — ready-made liveness/readiness probe for deployments.",
+	"author": "anesis-dev",
+	"requires": [],
+	"inputs": [],
+	"detect": [],
+	"variants": [
+		{
+			"when": null,
+			"commands": [
+				{
+					"name": "install",
+					"description": "Installs @nestjs/terminus and registers a HealthModule exposing GET /health",
+					"once": true,
+					"requires_commands": [],
+					"inputs": [],
+					"steps": [
+						{
+							"type": "replace",
+							"target": { "type": "file", "file": "package.json" },
+							"find": "\"dependencies\": {",
+							"replace": "\"dependencies\": {\n    \"@nestjs/terminus\": \"^11.0.0\",",
+							"if_not_found": "skip"
+						},
+						{
+							"type": "copy",
+							"src": "files/install/health.controller.ts",
+							"dest": "src/health/health.controller.ts"
+						},
+						{
+							"type": "copy",
+							"src": "files/install/health.module.ts",
+							"dest": "src/health/health.module.ts"
+						},
+						{
+							"type": "inject",
+							"target": { "type": "file", "file": "src/app.module.ts" },
+							"content": "import { HealthModule } from './health/health.module';",
+							"after": "// anesis:top-imports",
+							"if_not_found": "error"
+						},
+						{
+							"type": "inject",
+							"target": { "type": "file", "file": "src/app.module.ts" },
+							"content": "\t\tHealthModule,",
+							"before": "\t\t// anesis:module-imports",
+							"if_not_found": "error"
+						}
+					]
+				}
+			]
+		}
+	]
+}

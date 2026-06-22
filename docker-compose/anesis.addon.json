@@ -1,0 +1,279 @@
+{
+	"$schema": "https://anesis-server-maksym-zhuk8433-w6h7le9s.leapcell.dev/schema/anesis.addon.schema.json",
+	"schema_version": "1",
+	"id": "docker-compose",
+	"name": "Docker Compose Services",
+	"version": "0.1.0",
+	"description": "Creates a docker-compose.yml and lets you add common dev services on demand (postgres, redis, mongo, rabbitmq, mailpit). Each command injects the service + named volume and auto-fills .env / .env.example with the matching connection variables.",
+	"author": "anesis-dev",
+	"requires": [],
+	"inputs": [],
+	"detect": [],
+	"variants": [
+		{
+			"when": null,
+			"commands": [
+				{
+					"name": "install",
+					"description": "Creates a docker-compose.yml (with injection markers) plus .env / .env.example scaffolding",
+					"once": true,
+					"requires_commands": [],
+					"inputs": [],
+					"steps": [
+						{
+							"type": "copy",
+							"src": "files/install/docker-compose.yml",
+							"dest": "docker-compose.yml",
+							"if_exists": "skip"
+						},
+						{
+							"type": "create",
+							"path": ".env",
+							"content": "# Local environment variables \u2014 do not commit.\n",
+							"if_exists": "skip"
+						},
+						{
+							"type": "create",
+							"path": ".env.example",
+							"content": "# Copy to .env and fill in real values.\n",
+							"if_exists": "skip"
+						},
+						{
+							"type": "append",
+							"target": {
+								"type": "file",
+								"file": ".gitignore"
+							},
+							"content": "\n# Local env file\n.env\n"
+						}
+					]
+				},
+				{
+					"name": "add-postgres",
+					"description": "Adds a PostgreSQL service + volume and fills DATABASE_URL in .env",
+					"once": true,
+					"requires_commands": [
+						"install"
+					],
+					"inputs": [],
+					"steps": [
+						{
+							"type": "inject",
+							"target": {
+								"type": "file",
+								"file": "docker-compose.yml"
+							},
+							"content": "  postgres:\n    image: postgres:17-alpine\n    restart: unless-stopped\n    environment:\n      POSTGRES_USER: ${POSTGRES_USER:-postgres}\n      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}\n      POSTGRES_DB: ${POSTGRES_DB:-app}\n    ports:\n      - \"5432:5432\"\n    volumes:\n      - pgdata:/var/lib/postgresql/data\n    healthcheck:\n      test: [\"CMD-SHELL\", \"pg_isready -U ${POSTGRES_USER:-postgres}\"]\n      interval: 5s\n      timeout: 5s\n      retries: 5\n",
+							"before": "  # anesis:compose-services",
+							"if_not_found": "error"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "file",
+								"file": "docker-compose.yml"
+							},
+							"content": "  pgdata:\n",
+							"before": "  # anesis:compose-volumes",
+							"if_not_found": "error"
+						},
+						{
+							"type": "append",
+							"target": {
+								"type": "file",
+								"file": ".env"
+							},
+							"content": "\n# PostgreSQL\nPOSTGRES_USER=postgres\nPOSTGRES_PASSWORD=postgres\nPOSTGRES_DB=app\nDATABASE_URL=postgres://postgres:postgres@localhost:5432/app\n"
+						},
+						{
+							"type": "append",
+							"target": {
+								"type": "file",
+								"file": ".env.example"
+							},
+							"content": "\n# PostgreSQL\nPOSTGRES_USER=postgres\nPOSTGRES_PASSWORD=postgres\nPOSTGRES_DB=app\nDATABASE_URL=postgres://postgres:postgres@localhost:5432/app\n"
+						}
+					]
+				},
+				{
+					"name": "add-redis",
+					"description": "Adds a Redis service + volume and fills REDIS_URL in .env",
+					"once": true,
+					"requires_commands": [
+						"install"
+					],
+					"inputs": [],
+					"steps": [
+						{
+							"type": "inject",
+							"target": {
+								"type": "file",
+								"file": "docker-compose.yml"
+							},
+							"content": "  redis:\n    image: redis:7-alpine\n    restart: unless-stopped\n    ports:\n      - \"6379:6379\"\n    volumes:\n      - redisdata:/data\n    healthcheck:\n      test: [\"CMD\", \"redis-cli\", \"ping\"]\n      interval: 5s\n      timeout: 3s\n      retries: 5\n",
+							"before": "  # anesis:compose-services",
+							"if_not_found": "error"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "file",
+								"file": "docker-compose.yml"
+							},
+							"content": "  redisdata:\n",
+							"before": "  # anesis:compose-volumes",
+							"if_not_found": "error"
+						},
+						{
+							"type": "append",
+							"target": {
+								"type": "file",
+								"file": ".env"
+							},
+							"content": "\n# Redis\nREDIS_HOST=localhost\nREDIS_PORT=6379\nREDIS_URL=redis://localhost:6379\n"
+						},
+						{
+							"type": "append",
+							"target": {
+								"type": "file",
+								"file": ".env.example"
+							},
+							"content": "\n# Redis\nREDIS_HOST=localhost\nREDIS_PORT=6379\nREDIS_URL=redis://localhost:6379\n"
+						}
+					]
+				},
+				{
+					"name": "add-mongo",
+					"description": "Adds a MongoDB service + volume and fills MONGO_URL in .env",
+					"once": true,
+					"requires_commands": [
+						"install"
+					],
+					"inputs": [],
+					"steps": [
+						{
+							"type": "inject",
+							"target": {
+								"type": "file",
+								"file": "docker-compose.yml"
+							},
+							"content": "  mongo:\n    image: mongo:8\n    restart: unless-stopped\n    environment:\n      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-root}\n      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-root}\n    ports:\n      - \"27017:27017\"\n    volumes:\n      - mongodata:/data/db\n",
+							"before": "  # anesis:compose-services",
+							"if_not_found": "error"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "file",
+								"file": "docker-compose.yml"
+							},
+							"content": "  mongodata:\n",
+							"before": "  # anesis:compose-volumes",
+							"if_not_found": "error"
+						},
+						{
+							"type": "append",
+							"target": {
+								"type": "file",
+								"file": ".env"
+							},
+							"content": "\n# MongoDB\nMONGO_INITDB_ROOT_USERNAME=root\nMONGO_INITDB_ROOT_PASSWORD=root\nMONGO_URL=mongodb://root:root@localhost:27017/app?authSource=admin\n"
+						},
+						{
+							"type": "append",
+							"target": {
+								"type": "file",
+								"file": ".env.example"
+							},
+							"content": "\n# MongoDB\nMONGO_INITDB_ROOT_USERNAME=root\nMONGO_INITDB_ROOT_PASSWORD=root\nMONGO_URL=mongodb://root:root@localhost:27017/app?authSource=admin\n"
+						}
+					]
+				},
+				{
+					"name": "add-rabbitmq",
+					"description": "Adds a RabbitMQ (management) service + volume and fills RABBITMQ_URL in .env",
+					"once": true,
+					"requires_commands": [
+						"install"
+					],
+					"inputs": [],
+					"steps": [
+						{
+							"type": "inject",
+							"target": {
+								"type": "file",
+								"file": "docker-compose.yml"
+							},
+							"content": "  rabbitmq:\n    image: rabbitmq:4-management-alpine\n    restart: unless-stopped\n    environment:\n      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-guest}\n      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-guest}\n    ports:\n      - \"5672:5672\"\n      - \"15672:15672\"\n    volumes:\n      - rabbitmqdata:/var/lib/rabbitmq\n",
+							"before": "  # anesis:compose-services",
+							"if_not_found": "error"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "file",
+								"file": "docker-compose.yml"
+							},
+							"content": "  rabbitmqdata:\n",
+							"before": "  # anesis:compose-volumes",
+							"if_not_found": "error"
+						},
+						{
+							"type": "append",
+							"target": {
+								"type": "file",
+								"file": ".env"
+							},
+							"content": "\n# RabbitMQ (management UI at http://localhost:15672)\nRABBITMQ_DEFAULT_USER=guest\nRABBITMQ_DEFAULT_PASS=guest\nRABBITMQ_URL=amqp://guest:guest@localhost:5672\n"
+						},
+						{
+							"type": "append",
+							"target": {
+								"type": "file",
+								"file": ".env.example"
+							},
+							"content": "\n# RabbitMQ (management UI at http://localhost:15672)\nRABBITMQ_DEFAULT_USER=guest\nRABBITMQ_DEFAULT_PASS=guest\nRABBITMQ_URL=amqp://guest:guest@localhost:5672\n"
+						}
+					]
+				},
+				{
+					"name": "add-mailpit",
+					"description": "Adds a Mailpit SMTP test server and fills SMTP_* vars in .env",
+					"once": true,
+					"requires_commands": [
+						"install"
+					],
+					"inputs": [],
+					"steps": [
+						{
+							"type": "inject",
+							"target": {
+								"type": "file",
+								"file": "docker-compose.yml"
+							},
+							"content": "  mailpit:\n    image: axllent/mailpit:latest\n    restart: unless-stopped\n    ports:\n      - \"1025:1025\"\n      - \"8025:8025\"\n",
+							"before": "  # anesis:compose-services",
+							"if_not_found": "error"
+						},
+						{
+							"type": "append",
+							"target": {
+								"type": "file",
+								"file": ".env"
+							},
+							"content": "\n# Mailpit SMTP test server (web UI at http://localhost:8025)\nSMTP_HOST=localhost\nSMTP_PORT=1025\n"
+						},
+						{
+							"type": "append",
+							"target": {
+								"type": "file",
+								"file": ".env.example"
+							},
+							"content": "\n# Mailpit SMTP test server (web UI at http://localhost:8025)\nSMTP_HOST=localhost\nSMTP_PORT=1025\n"
+						}
+					]
+				}
+			]
+		}
+	]
+}

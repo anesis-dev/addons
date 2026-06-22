@@ -1,0 +1,46 @@
+{
+	"$schema": "https://anesis-server-maksym-zhuk8433-w6h7le9s.leapcell.dev/schema/anesis.addon.schema.json",
+	"schema_version": "1",
+	"id": "nest-docker",
+	"name": "Nest Docker",
+	"version": "0.1.0",
+	"description": "Adds a multi-stage Dockerfile, a docker-compose.yml (app + PostgreSQL) and a .dockerignore so a NestJS project is ready to build and deploy as a container.",
+	"author": "anesis-dev",
+	"requires": [],
+	"inputs": [],
+	"detect": [],
+	"variants": [
+		{
+			"when": null,
+			"commands": [
+				{
+					"name": "install",
+					"description": "Copies a production-ready Dockerfile, docker-compose.yml and .dockerignore into the project",
+					"once": true,
+					"requires_commands": [],
+					"inputs": [],
+					"steps": [
+						{
+							"type": "copy",
+							"src": "files/install/Dockerfile",
+							"dest": "Dockerfile",
+							"if_exists": "skip"
+						},
+						{
+							"type": "copy",
+							"src": "files/install/.dockerignore",
+							"dest": ".dockerignore",
+							"if_exists": "skip"
+						},
+						{
+							"type": "copy",
+							"src": "files/install/docker-compose.yml",
+							"dest": "docker-compose.yml",
+							"if_exists": "skip"
+						}
+					]
+				}
+			]
+		}
+	]
+}
