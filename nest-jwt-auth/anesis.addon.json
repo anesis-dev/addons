@@ -42,24 +42,9 @@
           "inputs": [],
           "steps": [
             {
-              "type": "replace",
-              "target": {
-                "type": "file",
-                "file": "package.json"
-              },
-              "find": "\"dependencies\": {",
-              "replace": "\"dependencies\": {\n    \"@nestjs/jwt\": \"^10.2.0\",\n    \"@nestjs/passport\": \"^10.0.3\",\n    \"passport\": \"^0.7.0\",\n    \"passport-jwt\": \"^4.0.1\",\n    \"bcryptjs\": \"^2.4.3\",",
-              "if_not_found": "skip"
-            },
-            {
-              "type": "replace",
-              "target": {
-                "type": "file",
-                "file": "package.json"
-              },
-              "find": "\"devDependencies\": {",
-              "replace": "\"devDependencies\": {\n    \"@types/passport-jwt\": \"^4.0.1\",\n    \"@types/bcryptjs\": \"^2.4.6\",",
-              "if_not_found": "skip"
+              "type": "packages",
+              "dependencies": ["@nestjs/jwt@^10.2.0", "@nestjs/passport@^10.0.3", "passport@^0.7.0", "passport-jwt@^4.0.1", "bcryptjs@^2.4.3"],
+              "dev_dependencies": ["@types/passport-jwt@^4.0.1", "@types/bcryptjs@^2.4.6"]
             },
             {
               "type": "append",
@@ -150,24 +135,9 @@
           "inputs": [],
           "steps": [
             {
-              "type": "replace",
-              "target": {
-                "type": "file",
-                "file": "package.json"
-              },
-              "find": "\"dependencies\": {",
-              "replace": "\"dependencies\": {\n    \"@nestjs/jwt\": \"^10.2.0\",\n    \"@nestjs/passport\": \"^10.0.3\",\n    \"passport\": \"^0.7.0\",\n    \"passport-jwt\": \"^4.0.1\",\n    \"bcryptjs\": \"^2.4.3\",",
-              "if_not_found": "skip"
-            },
-            {
-              "type": "replace",
-              "target": {
-                "type": "file",
-                "file": "package.json"
-              },
-              "find": "\"devDependencies\": {",
-              "replace": "\"devDependencies\": {\n    \"@types/passport-jwt\": \"^4.0.1\",\n    \"@types/bcryptjs\": \"^2.4.6\",",
-              "if_not_found": "skip"
+              "type": "packages",
+              "dependencies": ["@nestjs/jwt@^10.2.0", "@nestjs/passport@^10.0.3", "passport@^0.7.0", "passport-jwt@^4.0.1", "bcryptjs@^2.4.3"],
+              "dev_dependencies": ["@types/passport-jwt@^4.0.1", "@types/bcryptjs@^2.4.6"]
             },
             {
               "type": "append",
@@ -260,24 +230,9 @@
           "inputs": [],
           "steps": [
             {
-              "type": "replace",
-              "target": {
-                "type": "file",
-                "file": "package.json"
-              },
-              "find": "\"dependencies\": {",
-              "replace": "\"dependencies\": {\n    \"@nestjs/jwt\": \"^10.2.0\",\n    \"@nestjs/passport\": \"^10.0.3\",\n    \"passport\": \"^0.7.0\",\n    \"passport-jwt\": \"^4.0.1\",",
-              "if_not_found": "skip"
-            },
-            {
-              "type": "replace",
-              "target": {
-                "type": "file",
-                "file": "package.json"
-              },
-              "find": "\"devDependencies\": {",
-              "replace": "\"devDependencies\": {\n    \"@types/passport-jwt\": \"^4.0.1\",",
-              "if_not_found": "skip"
+              "type": "packages",
+              "dependencies": ["@nestjs/jwt@^10.2.0", "@nestjs/passport@^10.0.3", "passport@^0.7.0", "passport-jwt@^4.0.1"],
+              "dev_dependencies": ["@types/passport-jwt@^4.0.1"]
             },
             {
               "type": "append",

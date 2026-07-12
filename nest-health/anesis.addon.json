@@ -21,11 +21,8 @@
 					"inputs": [],
 					"steps": [
 						{
-							"type": "replace",
-							"target": { "type": "file", "file": "package.json" },
-							"find": "\"dependencies\": {",
-							"replace": "\"dependencies\": {\n    \"@nestjs/terminus\": \"^11.0.0\",",
-							"if_not_found": "skip"
+							"type": "packages",
+							"dependencies": ["@nestjs/terminus@^11.0.0"]
 						},
 						{
 							"type": "copy",

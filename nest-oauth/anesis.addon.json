@@ -21,18 +21,9 @@
 					"inputs": [],
 					"steps": [
 						{
-							"type": "replace",
-							"target": { "type": "file", "file": "package.json" },
-							"find": "\"dependencies\": {",
-							"replace": "\"dependencies\": {\n    \"@nestjs/passport\": \"^10.0.3\",\n    \"@nestjs/jwt\": \"^10.2.0\",\n    \"passport\": \"^0.7.0\",",
-							"if_not_found": "skip"
-						},
-						{
-							"type": "replace",
-							"target": { "type": "file", "file": "package.json" },
-							"find": "\"devDependencies\": {",
-							"replace": "\"devDependencies\": {\n    \"@types/passport\": \"^1.0.16\",",
-							"if_not_found": "skip"
+							"type": "packages",
+							"dependencies": ["@nestjs/passport@^10.0.3", "@nestjs/jwt@^10.2.0", "passport@^0.7.0"],
+							"dev_dependencies": ["@types/passport@^1.0.16"]
 						},
 						{
 							"type": "append",
@@ -78,18 +69,9 @@
 					"inputs": [],
 					"steps": [
 						{
-							"type": "replace",
-							"target": { "type": "file", "file": "package.json" },
-							"find": "\"dependencies\": {",
-							"replace": "\"dependencies\": {\n    \"passport-google-oauth20\": \"^2.0.0\",",
-							"if_not_found": "skip"
-						},
-						{
-							"type": "replace",
-							"target": { "type": "file", "file": "package.json" },
-							"find": "\"devDependencies\": {",
-							"replace": "\"devDependencies\": {\n    \"@types/passport-google-oauth20\": \"^2.0.16\",",
-							"if_not_found": "skip"
+							"type": "packages",
+							"dependencies": ["passport-google-oauth20@^2.0.0"],
+							"dev_dependencies": ["@types/passport-google-oauth20@^2.0.16"]
 						},
 						{
 							"type": "append",
@@ -137,18 +119,9 @@
 					"inputs": [],
 					"steps": [
 						{
-							"type": "replace",
-							"target": { "type": "file", "file": "package.json" },
-							"find": "\"dependencies\": {",
-							"replace": "\"dependencies\": {\n    \"passport-github2\": \"^0.1.12\",",
-							"if_not_found": "skip"
-						},
-						{
-							"type": "replace",
-							"target": { "type": "file", "file": "package.json" },
-							"find": "\"devDependencies\": {",
-							"replace": "\"devDependencies\": {\n    \"@types/passport-github2\": \"^1.2.9\",",
-							"if_not_found": "skip"
+							"type": "packages",
+							"dependencies": ["passport-github2@^0.1.12"],
+							"dev_dependencies": ["@types/passport-github2@^1.2.9"]
 						},
 						{
 							"type": "append",
@@ -196,11 +169,8 @@
 					"inputs": [],
 					"steps": [
 						{
-							"type": "replace",
-							"target": { "type": "file", "file": "package.json" },
-							"find": "\"dependencies\": {",
-							"replace": "\"dependencies\": {\n    \"passport-discord\": \"^0.1.4\",",
-							"if_not_found": "skip"
+							"type": "packages",
+							"dependencies": ["passport-discord@^0.1.4"]
 						},
 						{
 							"type": "append",

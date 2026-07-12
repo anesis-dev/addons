@@ -21,18 +21,9 @@
 					"inputs": [],
 					"steps": [
 						{
-							"type": "replace",
-							"target": { "type": "file", "file": "package.json" },
-							"find": "\"dependencies\": {",
-							"replace": "\"dependencies\": {\n    \"@prisma/client\": \"^7.0.0\",\n    \"@prisma/adapter-pg\": \"^7.0.0\",\n    \"pg\": \"^8.13.0\",\n    \"@nestjs/mapped-types\": \"^2.1.0\",",
-							"if_not_found": "skip"
-						},
-						{
-							"type": "replace",
-							"target": { "type": "file", "file": "package.json" },
-							"find": "\"devDependencies\": {",
-							"replace": "\"devDependencies\": {\n    \"prisma\": \"^7.0.0\",\n    \"@types/pg\": \"^8.11.10\",",
-							"if_not_found": "skip"
+							"type": "packages",
+							"dependencies": ["@prisma/client@^7.0.0", "@prisma/adapter-pg@^7.0.0", "pg@^8.13.0", "@nestjs/mapped-types@^2.1.0"],
+							"dev_dependencies": ["prisma@^7.0.0", "@types/pg@^8.11.10"]
 						},
 						{
 							"type": "replace",

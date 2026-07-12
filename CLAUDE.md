@@ -171,6 +171,37 @@ Omitting both `after` and `before` prepends the content to the file.
 }
 ```
 
+### `packages` — install dependencies with the project's package manager
+
+```jsonc
+{
+  "type": "packages",
+  "dependencies": ["express@^4.18", "@prisma/client@^6.6.0"],
+  "dev_dependencies": ["@types/express", "prisma@^6.6.0"]
+}
+```
+
+The CLI detects the package manager from lock-files (`bun.lock`/`bun.lockb` → bun, `pnpm-lock.yaml` → pnpm, `yarn.lock` → yarn, else `package.json` → npm; `Cargo.toml` → `cargo add`) and runs its install/add command in the project root. Prefer this over hand-editing `package.json` with `replace`.
+
+- Specs are passed verbatim, so `pkg@^1.2` version ranges work.
+- Rollback/undo restores the pre-install manifest + lock file (dropping the added entries); `node_modules`/`target` are left as-is.
+- Runs a real subprocess and hits the network — it's counted under "edited" in the confirmation prompt, skipped in `--dry-run`.
+
+### `run` — run a shell command in the project root
+
+```jsonc
+{
+  "type": "run",
+  "command": "npx prisma generate",
+  "description": "Generate the Prisma client"   // optional, shown before running
+}
+```
+
+Runs `sh -c "<command>"` in the project root. Tera vars work in `command`.
+
+- **Not reversible**: `undo` warns that the command's effects remain rather than trying to revert them. Use it for codegen/formatting, not for state you'll want to roll back.
+- Runs arbitrary code: the exact command is shown and confirmed before it runs (`--yes` accepts; `--dry-run` only prints it). Declining aborts the command (triggering rollback of earlier steps).
+
 ### `delete` — delete a file or glob of files
 
 ```jsonc
@@ -221,13 +252,21 @@ Templates must have these markers in `src/app.module.ts`:
 
 ### Adding npm packages
 
-Use `replace` on `package.json` — inject into `"dependencies": {` or `"devDependencies": {`. The user runs `npm install` / `yarn` manually after.
+Use the `packages` step — it detects the package manager and installs for real, so no manual `npm install` afterwards. (Legacy addons `replace` into `"dependencies": {`; prefer `packages` for new ones.)
 
 ### Generating resources (repeatable commands)
 
 Set `"once": false` and `"requires_commands": ["install"]`. Collect a `resource_name` input and use `{{ resource_name_pascal }}`, `{{ resource_name_kebab }}`, etc. throughout file paths and content.
 
 ---
+
+## Testing an addon locally
+
+```bash
+anesis addon test <addon-id> <command> --project ./path/to/fixture-project
+```
+
+Copies the fixture project into a throwaway temp dir, runs the command there with default inputs (non-interactive), and prints a diff of what changed — the original is never touched. Omit `--project` to use a `test-fixture/` directory shipped alongside the addon. `anesis.lock` is excluded from the diff (it's internal bookkeeping).
 
 ## Publishing
 

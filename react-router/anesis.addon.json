@@ -21,14 +21,8 @@
           "inputs": [],
           "steps": [
             {
-              "type": "replace",
-              "target": {
-                "type": "file",
-                "file": "package.json"
-              },
-              "find": "\"dependencies\": {",
-              "replace": "\"dependencies\": {\n    \"react-router\": \"^7.6.0\",",
-              "if_not_found": "skip"
+              "type": "packages",
+              "dependencies": ["react-router@^7.6.0"]
             },
             {
               "type": "inject",

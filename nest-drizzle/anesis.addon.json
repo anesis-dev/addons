@@ -81,24 +81,9 @@
               "if_not_found": "error"
             },
             {
-              "type": "replace",
-              "target": {
-                "type": "file",
-                "file": "package.json"
-              },
-              "find": "\"dependencies\": {",
-              "replace": "\"dependencies\": {\n    \"drizzle-orm\": \"^0.43.1\",\n    \"pg\": \"^8.13.3\",\n    \"@nestjs/mapped-types\": \"^2.1.0\",",
-              "if_not_found": "skip"
-            },
-            {
-              "type": "replace",
-              "target": {
-                "type": "file",
-                "file": "package.json"
-              },
-              "find": "\"devDependencies\": {",
-              "replace": "\"devDependencies\": {\n    \"drizzle-kit\": \"^0.31.1\",\n    \"@types/pg\": \"^8.11.11\",",
-              "if_not_found": "skip"
+              "type": "packages",
+              "dependencies": ["drizzle-orm@^0.43.1", "pg@^8.13.3", "@nestjs/mapped-types@^2.1.0"],
+              "dev_dependencies": ["drizzle-kit@^0.31.1", "@types/pg@^8.11.11"]
             },
             {
               "type": "replace",
@@ -241,24 +226,9 @@
               "if_not_found": "error"
             },
             {
-              "type": "replace",
-              "target": {
-                "type": "file",
-                "file": "package.json"
-              },
-              "find": "\"dependencies\": {",
-              "replace": "\"dependencies\": {\n    \"drizzle-orm\": \"^0.43.1\",\n    \"pg\": \"^8.13.3\",\n    \"@nestjs/mapped-types\": \"^2.1.0\",",
-              "if_not_found": "skip"
-            },
-            {
-              "type": "replace",
-              "target": {
-                "type": "file",
-                "file": "package.json"
-              },
-              "find": "\"devDependencies\": {",
-              "replace": "\"devDependencies\": {\n    \"drizzle-kit\": \"^0.31.1\",\n    \"@types/pg\": \"^8.11.11\",",
-              "if_not_found": "skip"
+              "type": "packages",
+              "dependencies": ["drizzle-orm@^0.43.1", "pg@^8.13.3", "@nestjs/mapped-types@^2.1.0"],
+              "dev_dependencies": ["drizzle-kit@^0.31.1", "@types/pg@^8.11.11"]
             },
             {
               "type": "replace",

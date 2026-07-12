@@ -21,14 +21,8 @@
           "inputs": [],
           "steps": [
             {
-              "type": "replace",
-              "target": {
-                "type": "file",
-                "file": "package.json"
-              },
-              "find": "\"dependencies\": {",
-              "replace": "\"dependencies\": {\n    \"@tanstack/react-query\": \"^5.80.5\",\n    \"@tanstack/react-query-devtools\": \"^5.80.5\",",
-              "if_not_found": "skip"
+              "type": "packages",
+              "dependencies": ["@tanstack/react-query@^5.80.5", "@tanstack/react-query-devtools@^5.80.5"]
             },
             {
               "type": "copy",

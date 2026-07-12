@@ -21,11 +21,8 @@
           "inputs": [],
           "steps": [
             {
-              "type": "replace",
-              "target": { "type": "file", "file": "package.json" },
-              "find": "\"dependencies\": {",
-              "replace": "\"dependencies\": {\n    \"class-validator\": \"^0.14.1\",\n    \"class-transformer\": \"^0.5.1\",",
-              "if_not_found": "skip"
+              "type": "packages",
+              "dependencies": ["class-validator@^0.14.1", "class-transformer@^0.5.1"]
             },
             {
               "type": "inject",
