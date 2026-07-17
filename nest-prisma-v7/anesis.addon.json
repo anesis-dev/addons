@@ -3,7 +3,7 @@
     "schema_version": "1",
     "id": "nest-prisma-v7",
     "name": "Nest Prisma 7",
-    "version": "0.3.0",
+    "version": "0.4.0",
     "description": "Adds Prisma 7 (PostgreSQL) to a NestJS project: new `prisma-client` generator (CommonJS, generated under src/) plus the @prisma/adapter-pg driver adapter, and a resource generator that replaces `nest g res` — no tests, real DB queries.",
     "author": "anesis-dev",
     "requires": [],
