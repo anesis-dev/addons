@@ -1,5 +1,5 @@
 {
-    "$schema": "https://anesis-server-maksym-zhuk8433-w6h7le9s.leapcell.dev/schema/anesis.addon.schema.json",
+    "$schema": "http://localhost:4000/schema/anesis.addon.schema.json",
     "schema_version": "1",
     "id": "nest-prisma-v7",
     "name": "Nest Prisma 7",
@@ -27,7 +27,8 @@
                                 "@prisma/adapter-pg@^7.0.0",
                                 "pg@^8.13.0",
                                 "@nestjs/mapped-types@^2.1.0",
-                                "@nestjs/config"
+                                "@nestjs/config",
+                                "dotenv"
                             ],
                             "dev_dependencies": [
                                 "prisma@^7.0.0",
@@ -92,6 +93,16 @@
                                 "type": "file",
                                 "file": "src/app.module.ts"
                             },
+                            "content": "import { ConfigModule } from '@nestjs/config';",
+                            "after": "// anesis:top-imports",
+                            "if_not_found": "error"
+                        },
+                        {
+                            "type": "inject",
+                            "target": {
+                                "type": "file",
+                                "file": "src/app.module.ts"
+                            },
                             "content": "\t\tPrismaModule,",
                             "before": "\t\t// anesis:module-imports",
                             "if_not_found": "error"
@@ -122,6 +133,12 @@
                         }
                     ],
                     "steps": [
+                        {
+                            "type": "create",
+                            "path": "prisma/schema/{{ resource_name_snake }}.prisma",
+                            "content": "",
+                            "if_exists": "overwrite"
+                        },
                         {
                             "type": "append",
                             "target": {

@@ -1,5 +1,5 @@
 {
-	"$schema": "https://anesis-server-maksym-zhuk8433-w6h7le9s.leapcell.dev/schema/anesis.addon.schema.json",
+	"$schema": "https://anesis-server.onrender.com/schema/anesis.addon.schema.json",
 	"schema_version": "1",
 	"id": "docker-compose",
 	"name": "Docker Compose Services",

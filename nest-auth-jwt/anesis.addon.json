@@ -1,0 +1,147 @@
+{
+    "$schema": "https://anesis-server.onrender.com/schema/anesis.addon.schema.json",
+    "schema_version": "1",
+    "id": "nest-auth-jwt",
+    "name": "Nest JWT Auth (cookies + refresh)",
+    "version": "0.1.0",
+    "description": "Cookie-based JWT auth for NestJS: register/login/me/logout/refresh, argon2 password hashing, Passport access + refresh strategies, a global AccessTokenGuard with an @Public() bypass, and a User Prisma model. Ported 1:1 from github.com/Maksym-Zhuk/insiders-booking (backend/src/modules/auth). Requires nest-prisma-v7 (PrismaService) and nest-validation (global ValidationPipe the DTOs rely on). Overwrites prisma/schema/user.prisma to guarantee the id/name/email/password/refreshToken shape this module needs.",
+    "author": "anesis-dev",
+    "requires": ["nest-prisma-v7", "nest-validation"],
+    "inputs": [],
+    "detect": [],
+    "variants": [
+        {
+            "when": null,
+            "commands": [
+                {
+                    "name": "install",
+                    "description": "Adds the auth module (controller/service/guards/strategies/decorators), a User model, JWT env vars, and wires cookie parsing + CORS in main.ts",
+                    "once": true,
+                    "requires_commands": [],
+                    "inputs": [],
+                    "steps": [
+                        {
+                            "type": "packages",
+                            "dependencies": [
+                                "@nestjs/jwt@^11.0.2",
+                                "@nestjs/passport@^11.0.5",
+                                "passport-jwt@^4.0.1",
+                                "argon2@^0.44.0",
+                                "cookie-parser@^1.4.7"
+                            ],
+                            "dev_dependencies": [
+                                "@types/passport-jwt@^4.0.1",
+                                "@types/cookie-parser@^1.4.10"
+                            ]
+                        },
+                        {
+                            "type": "copy",
+                            "src": "files/install/user.prisma",
+                            "dest": "prisma/schema/user.prisma",
+                            "if_exists": "overwrite"
+                        },
+                        {
+                            "type": "copy",
+                            "src": "files/install/auth.service.ts",
+                            "dest": "src/modules/auth/auth.service.ts"
+                        },
+                        {
+                            "type": "copy",
+                            "src": "files/install/auth.controller.ts",
+                            "dest": "src/modules/auth/auth.controller.ts"
+                        },
+                        {
+                            "type": "copy",
+                            "src": "files/install/auth.module.ts",
+                            "dest": "src/modules/auth/auth.module.ts"
+                        },
+                        {
+                            "type": "copy",
+                            "src": "files/install/decorators/current-user.decorator.ts",
+                            "dest": "src/modules/auth/decorators/current-user.decorator.ts"
+                        },
+                        {
+                            "type": "copy",
+                            "src": "files/install/decorators/public.decorator.ts",
+                            "dest": "src/modules/auth/decorators/public.decorator.ts"
+                        },
+                        {
+                            "type": "copy",
+                            "src": "files/install/dto/login.dto.ts",
+                            "dest": "src/modules/auth/dto/login.dto.ts"
+                        },
+                        {
+                            "type": "copy",
+                            "src": "files/install/dto/register.dto.ts",
+                            "dest": "src/modules/auth/dto/register.dto.ts"
+                        },
+                        {
+                            "type": "copy",
+                            "src": "files/install/guards/access-token.guard.ts",
+                            "dest": "src/modules/auth/guards/access-token.guard.ts"
+                        },
+                        {
+                            "type": "copy",
+                            "src": "files/install/guards/refresh-token.guard.ts",
+                            "dest": "src/modules/auth/guards/refresh-token.guard.ts"
+                        },
+                        {
+                            "type": "copy",
+                            "src": "files/install/strategies/access-token.strategy.ts",
+                            "dest": "src/modules/auth/strategies/access-token.strategy.ts"
+                        },
+                        {
+                            "type": "copy",
+                            "src": "files/install/strategies/refresh-token.strategy.ts",
+                            "dest": "src/modules/auth/strategies/refresh-token.strategy.ts"
+                        },
+                        {
+                            "type": "copy",
+                            "src": "files/install/types/express.d.ts",
+                            "dest": "src/modules/auth/types/express.d.ts"
+                        },
+                        {
+                            "type": "append",
+                            "target": { "type": "file", "file": ".env" },
+                            "content": "\n# JWT auth (nest-auth-jwt addon)\nJWT_ACCESS_SECRET=change-me-access-secret\nJWT_ACCESS_TTL=15m\nJWT_REFRESH_SECRET=change-me-refresh-secret\nJWT_REFRESH_TTL=7d\nCORS_ORIGIN=http://localhost:3000\n"
+                        },
+                        {
+                            "type": "inject",
+                            "target": { "type": "file", "file": "src/main.ts" },
+                            "content": "import cookieParser from 'cookie-parser';",
+                            "after": "from './app.module'",
+                            "if_not_found": "error"
+                        },
+                        {
+                            "type": "inject",
+                            "target": { "type": "file", "file": "src/main.ts" },
+                            "content": "  app.use(cookieParser());\n  app.enableCors({\n    origin: process.env.CORS_ORIGIN ?? 'http://localhost:3000',\n    credentials: true,\n  });",
+                            "before": "await app.listen",
+                            "if_not_found": "error"
+                        },
+                        {
+                            "type": "inject",
+                            "target": {
+                                "type": "file",
+                                "file": "src/app.module.ts"
+                            },
+                            "content": "import { AuthModule } from './modules/auth/auth.module';",
+                            "after": "// anesis:top-imports",
+                            "if_not_found": "error"
+                        },
+                        {
+                            "type": "inject",
+                            "target": {
+                                "type": "file",
+                                "file": "src/app.module.ts"
+                            },
+                            "content": "\t\tAuthModule,",
+                            "before": "\t\t// anesis:module-imports",
+                            "if_not_found": "error"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
