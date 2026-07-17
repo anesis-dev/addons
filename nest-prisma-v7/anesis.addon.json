@@ -46,7 +46,7 @@
                         {
                             "type": "copy",
                             "src": "files/install/schema.prisma",
-                            "dest": "prisma/schema",
+                            "dest": "prisma/schema/schema.prisma",
                             "if_exists": "skip"
                         },
                         {
