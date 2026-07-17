@@ -3,7 +3,7 @@
     "schema_version": "1",
     "id": "nest-prisma-v7",
     "name": "Nest Prisma 7",
-    "version": "0.4.0",
+    "version": "0.5.0",
     "description": "Adds Prisma 7 (PostgreSQL) to a NestJS project: new `prisma-client` generator (CommonJS, generated under src/) plus the @prisma/adapter-pg driver adapter, and a resource generator that replaces `nest g res` — no tests, real DB queries.",
     "author": "anesis-dev",
     "requires": [],
@@ -27,6 +27,7 @@
                                 "@prisma/adapter-pg@^7.0.0",
                                 "pg@^8.13.0",
                                 "@nestjs/mapped-types@^2.1.0"
+                                "@nestjs/config"
                             ],
                             "dev_dependencies": [
                                 "prisma@^7.0.0",
@@ -94,6 +95,16 @@
                             "content": "\t\tPrismaModule,",
                             "before": "\t\t// anesis:module-imports",
                             "if_not_found": "error"
+                        },
+                        {
+                            "type": "inject",
+                            "target": {
+                                "type": "file",
+                                "file": "src/app.module.ts"
+                            },
+                            "content": "\t\t ConfigModule.forRoot({ isGlobal: true }),",
+                            "before": "\t\t// anesis:module-imports",
+                            "if_not_found": "error"
                         }
                     ]
                 },
@@ -115,7 +126,7 @@
                             "type": "append",
                             "target": {
                                 "type": "file",
-                                "file": "prisma/schema.prisma"
+                                "file": "prisma/schema/{{ resource_name_snake }}.prisma"
                             },
                             "content": "\n// TODO: add your fields and run `npm run db:generate`\nmodel {{ resource_name_pascal }} {\n  id        Int      @id @default(autoincrement())\n  createdAt DateTime @default(now()) @map(\"created_at\")\n  updatedAt DateTime @updatedAt @map(\"updated_at\")\n\n  @@map(\"{{ resource_name_snake }}\")\n}\n"
                         },
