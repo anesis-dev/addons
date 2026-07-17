@@ -1,22 +1,9 @@
-// This is your Prisma schema file.
-// Learn more: https://pris.ly/d/prisma-schema
-//
-// Prisma 7 notes:
-//   - The new `prisma-client` generator emits the client into a local folder
-//     (below) instead of node_modules. Run `npm run db:generate` after editing.
-//   - `moduleFormat = "cjs"` is required: Prisma 7 ships ESM by default, which
-//     does not match NestJS's CommonJS build.
-//   - The output MUST live under `src/` so Nest compiles it. Keep it out of git.
-//   - At runtime the client talks to the database through a driver adapter
-//     (@prisma/adapter-pg), wired up in PrismaService.
-
 generator client {
-  provider     = "prisma-client"
-  output       = "../src/generated/prisma"
-  moduleFormat = "cjs"
+    provider     = "prisma-client"
+    output       = "../../src/generated/prisma"
+    moduleFormat = "cjs"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+    provider = "postgresql"
 }
