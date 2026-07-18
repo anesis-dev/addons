@@ -4,7 +4,7 @@
     "id": "nest-auth-jwt",
     "name": "Nest JWT Auth (cookies + refresh)",
     "version": "0.1.0",
-    "description": "Cookie-based JWT auth for NestJS: register/login/me/logout/refresh, argon2 password hashing, Passport access + refresh strategies, a global AccessTokenGuard with an @Public() bypass, and a User Prisma model. Ported 1:1 from github.com/Maksym-Zhuk/insiders-booking (backend/src/modules/auth). Requires nest-prisma-v7 (PrismaService) and nest-validation (global ValidationPipe the DTOs rely on). Overwrites prisma/schema/user.prisma to guarantee the id/name/email/password/refreshToken shape this module needs.",
+    "description": "Cookie-based JWT auth for NestJS: register/login/me/logout/refresh, argon2 hashing, Passport access + refresh strategies, a global AccessTokenGuard with @Public() bypass, and a User Prisma model. Requires nest-prisma-v7 and nest-validation. Overwrites user.prisma for the required shape.",
     "author": "anesis-dev",
     "requires": ["nest-prisma-v7", "nest-validation"],
     "inputs": [],
