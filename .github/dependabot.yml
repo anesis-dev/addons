@@ -1,0 +1,11 @@
+version: 2
+
+updates:
+  # This repository holds template/addon content, not an application, so the
+  # only thing with its own dependencies is CI itself.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: "chore(ci)"

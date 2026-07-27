@@ -5,7 +5,10 @@
 	"name": "Nest Health",
 	"version": "0.1.0",
 	"description": "Adds @nestjs/terminus and a /health endpoint with a memory check — ready-made liveness/readiness probe for deployments.",
-	"author": "anesis-dev",
+	"author": {
+		"name": "Maksym Zhuk",
+		"github": "anesis-dev"
+	},
 	"requires": [],
 	"inputs": [],
 	"detect": [],

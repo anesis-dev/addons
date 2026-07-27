@@ -1,0 +1,20 @@
+# Build output
+dist
+dist-electron
+dist-ssr
+build
+out
+release
+.next
+coverage
+
+# Dependencies and lock files — reformatting these only creates diff noise.
+node_modules
+bun.lock
+bun.lockb
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Rust side of Tauri projects; `cargo fmt` owns it.
+src-tauri/target

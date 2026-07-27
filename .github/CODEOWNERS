@@ -1,0 +1,6 @@
+# Every change needs a review from the maintainer. Addon content executes on
+# other people's machines — `run` steps are arbitrary shell and `packages` steps
+# install arbitrary dependencies — so nothing here lands unreviewed.
+
+*                      @Maksym-Zhuk
+/.github/              @Maksym-Zhuk

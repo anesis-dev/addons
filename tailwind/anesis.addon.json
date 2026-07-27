@@ -1,0 +1,232 @@
+{
+	"$schema": "https://anesis-server.onrender.com/schema/anesis.addon.schema.json",
+	"schema_version": "1",
+	"id": "tailwind",
+	"name": "Tailwind CSS",
+	"version": "0.1.0",
+	"description": "Adds Tailwind CSS v4 and wires it into the project's own build. Vite gets the first-party @tailwindcss/vite plugin; Rsbuild, Farm and Next get @tailwindcss/postcss. In every case `@import \"tailwindcss\"` lands in the project's entry stylesheet, so utility classes work straight after install.",
+	"author": {
+		"name": "Maksym Zhuk",
+		"github": "anesis-dev"
+	},
+	"requires": [],
+	"inputs": [],
+	"detect": [
+		{
+			"id": "next",
+			"rules": [
+				{
+					"type": "json_contains",
+					"file": "package.json",
+					"key_path": "dependencies.next"
+				}
+			]
+		},
+		{
+			"id": "vite",
+			"rules": [
+				{
+					"type": "json_contains",
+					"file": "package.json",
+					"key_path": "devDependencies.vite"
+				}
+			]
+		},
+		{
+			"id": "rsbuild",
+			"rules": [
+				{
+					"type": "json_contains",
+					"file": "package.json",
+					"key_path": "devDependencies.@rsbuild/core"
+				}
+			]
+		},
+		{
+			"id": "farm",
+			"rules": [
+				{
+					"type": "json_contains",
+					"file": "package.json",
+					"key_path": "devDependencies.@farmfe/core"
+				}
+			]
+		}
+	],
+	"variants": [
+		{
+			"when": "vite",
+			"commands": [
+				{
+					"name": "install",
+					"description": "Installs Tailwind v4 through the first-party Vite plugin",
+					"once": true,
+					"requires_commands": [],
+					"inputs": [],
+					"steps": [
+						{
+							"type": "packages",
+							"dev_dependencies": ["tailwindcss@^4.1.0", "@tailwindcss/vite@^4.1.0"]
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "glob",
+								"glob": "vite.config.*"
+							},
+							"content": "import tailwindcss from '@tailwindcss/vite'",
+							"after": "// anesis:top-imports",
+							"if_not_found": "error"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "glob",
+								"glob": "vite.config.*"
+							},
+							"content": "    tailwindcss(),",
+							"before": "// anesis:build-plugins",
+							"if_not_found": "error"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "file",
+								"file": "src/index.css"
+							},
+							"content": "@import \"tailwindcss\";",
+							"after": "/* anesis:css-imports */",
+							"if_not_found": "error"
+						}
+					]
+				}
+			]
+		},
+		{
+			"when": "rsbuild",
+			"commands": [
+				{
+					"name": "install",
+					"description": "Installs Tailwind v4 through PostCSS, which Rsbuild picks up automatically",
+					"once": true,
+					"requires_commands": [],
+					"inputs": [],
+					"steps": [
+						{
+							"type": "packages",
+							"dev_dependencies": ["tailwindcss@^4.1.0", "@tailwindcss/postcss@^4.1.0"]
+						},
+						{
+							"type": "copy",
+							"src": "files/install/postcss.config.mjs",
+							"dest": "postcss.config.mjs",
+							"if_exists": "ask"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "file",
+								"file": "src/index.css"
+							},
+							"content": "@import \"tailwindcss\";",
+							"after": "/* anesis:css-imports */",
+							"if_not_found": "error"
+						}
+					]
+				}
+			]
+		},
+		{
+			"when": "farm",
+			"commands": [
+				{
+					"name": "install",
+					"description": "Installs Tailwind v4 plus Farm's PostCSS plugin, which Farm does not enable by default",
+					"once": true,
+					"requires_commands": [],
+					"inputs": [],
+					"steps": [
+						{
+							"type": "packages",
+							"dev_dependencies": [
+								"tailwindcss@^4.1.0",
+								"@tailwindcss/postcss@^4.1.0",
+								"@farmfe/js-plugin-postcss@^1.11.0"
+							]
+						},
+						{
+							"type": "copy",
+							"src": "files/install/postcss.config.mjs",
+							"dest": "postcss.config.mjs",
+							"if_exists": "ask"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "file",
+								"file": "farm.config.ts"
+							},
+							"content": "import postcss from '@farmfe/js-plugin-postcss';",
+							"after": "// anesis:top-imports",
+							"if_not_found": "error"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "file",
+								"file": "farm.config.ts"
+							},
+							"content": "    postcss(),",
+							"before": "// anesis:build-plugins",
+							"if_not_found": "error"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "file",
+								"file": "src/index.css"
+							},
+							"content": "@import \"tailwindcss\";",
+							"after": "/* anesis:css-imports */",
+							"if_not_found": "error"
+						}
+					]
+				}
+			]
+		},
+		{
+			"when": "next",
+			"commands": [
+				{
+					"name": "install",
+					"description": "Installs Tailwind v4 through PostCSS, which Next picks up automatically",
+					"once": true,
+					"requires_commands": [],
+					"inputs": [],
+					"steps": [
+						{
+							"type": "packages",
+							"dev_dependencies": ["tailwindcss@^4.1.0", "@tailwindcss/postcss@^4.1.0"]
+						},
+						{
+							"type": "copy",
+							"src": "files/install/postcss.config.mjs",
+							"dest": "postcss.config.mjs",
+							"if_exists": "ask"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "file",
+								"file": "src/app/globals.css"
+							},
+							"content": "@import \"tailwindcss\";",
+							"after": "/* anesis:css-imports */",
+							"if_not_found": "error"
+						}
+					]
+				}
+			]
+		}
+	]
+}

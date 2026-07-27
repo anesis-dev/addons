@@ -1,0 +1,68 @@
+{
+	"$schema": "https://anesis-server.onrender.com/schema/anesis.addon.schema.json",
+	"schema_version": "1",
+	"id": "axum-error",
+	"name": "Axum Error Handling",
+	"version": "0.1.0",
+	"description": "Adds a single AppError type with an IntoResponse impl, so handlers can use `?` and still return the right status and a consistent JSON error body. Internal causes are logged rather than returned, keeping database and upstream detail out of responses.",
+	"author": {
+		"name": "Maksym Zhuk",
+		"github": "anesis-dev"
+	},
+	"requires": [],
+	"inputs": [],
+	"detect": [
+		{
+			"id": "axum",
+			"rules": [
+				{
+					"type": "toml_contains",
+					"file": "Cargo.toml",
+					"key_path": "dependencies.axum"
+				}
+			]
+		}
+	],
+	"variants": [
+		{
+			"when": "axum",
+			"commands": [
+				{
+					"name": "install",
+					"description": "Adds src/error.rs and registers the module",
+					"once": true,
+					"requires_commands": [],
+					"inputs": [],
+					"steps": [
+						{
+							"type": "inject",
+							"target": {
+								"type": "file",
+								"file": "Cargo.toml"
+							},
+							"content": "anyhow = \"1.0.100\"\nthiserror = \"2.0.17\"",
+							"before": "# anesis:dependencies",
+							"if_not_found": "error"
+						},
+						{
+							"type": "copy",
+							"src": "files/install/error.rs",
+							"dest": "src/error.rs",
+							"if_exists": "ask"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "file",
+								"file": "src/main.rs"
+							},
+							"content": "mod error;",
+							"before": "// anesis:modules",
+							"if_not_found": "error"
+						}
+					]
+				}
+			]
+		}
+	]
+}

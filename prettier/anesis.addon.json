@@ -1,0 +1,102 @@
+{
+	"$schema": "https://anesis-server.onrender.com/schema/anesis.addon.schema.json",
+	"schema_version": "1",
+	"id": "prettier",
+	"name": "Prettier",
+	"version": "0.1.0",
+	"description": "Adds Prettier with a shared .prettierrc and .prettierignore, plus `format` and `format:check` scripts. Deliberately does not touch the ESLint config: the flat configs these templates ship enable no formatting rules, so the two tools do not overlap.",
+	"author": {
+		"name": "Maksym Zhuk",
+		"github": "anesis-dev"
+	},
+	"requires": [],
+	"inputs": [],
+	"detect": [
+		{
+			"id": "has-format-script",
+			"rules": [
+				{
+					"type": "json_contains",
+					"file": "package.json",
+					"key_path": "scripts.format"
+				}
+			]
+		}
+	],
+	"variants": [
+		{
+			"when": "has-format-script",
+			"commands": [
+				{
+					"name": "install",
+					"description": "Installs Prettier and its config files. The project already defines a `format` script, so that is left alone — blindly inserting another one would put a duplicate key in package.json.",
+					"once": true,
+					"requires_commands": [],
+					"inputs": [],
+					"steps": [
+						{
+							"type": "packages",
+							"dev_dependencies": [
+								"prettier@^3.7.0"
+							]
+						},
+						{
+							"type": "copy",
+							"src": "files/install/.prettierrc",
+							"dest": ".prettierrc",
+							"if_exists": "ask"
+						},
+						{
+							"type": "copy",
+							"src": "files/install/.prettierignore",
+							"dest": ".prettierignore",
+							"if_exists": "ask"
+						}
+					]
+				}
+			]
+		},
+		{
+			"when": null,
+			"commands": [
+				{
+					"name": "install",
+					"description": "Installs Prettier, its config files and the format scripts",
+					"once": true,
+					"requires_commands": [],
+					"inputs": [],
+					"steps": [
+						{
+							"type": "packages",
+							"dev_dependencies": [
+								"prettier@^3.7.0"
+							]
+						},
+						{
+							"type": "copy",
+							"src": "files/install/.prettierrc",
+							"dest": ".prettierrc",
+							"if_exists": "ask"
+						},
+						{
+							"type": "copy",
+							"src": "files/install/.prettierignore",
+							"dest": ".prettierignore",
+							"if_exists": "ask"
+						},
+						{
+							"type": "replace",
+							"target": {
+								"type": "file",
+								"file": "package.json"
+							},
+							"find": "\"scripts\": {",
+							"replace": "\"scripts\": {\n    \"format\": \"prettier --write .\",\n    \"format:check\": \"prettier --check .\",",
+							"if_not_found": "error"
+						}
+					]
+				}
+			]
+		}
+	]
+}

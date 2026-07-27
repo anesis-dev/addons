@@ -1,0 +1,139 @@
+{
+	"$schema": "https://anesis-server.onrender.com/schema/anesis.addon.schema.json",
+	"schema_version": "1",
+	"id": "react-router",
+	"name": "React Router",
+	"version": "0.1.0",
+	"description": "Adds React Router v7 in declarative mode: wraps the app root in a <BrowserRouter> through the template's provider markers, and drops a routes file (.tsx or .jsx, matching the project) with a home route and a catch-all. For single-page apps — Next.js has its own router.",
+	"author": {
+		"name": "Maksym Zhuk",
+		"github": "anesis-dev"
+	},
+	"requires": [],
+	"inputs": [],
+	"detect": [
+		{
+			"id": "typescript",
+			"rules": [
+				{
+					"type": "file_exists",
+					"file": "tsconfig.json"
+				}
+			]
+		}
+	],
+	"variants": [
+		{
+			"when": "typescript",
+			"commands": [
+				{
+					"name": "install",
+					"description": "Installs React Router, adds src/routes.tsx, and wraps the app root in a <BrowserRouter>. The wrapping targets every entry file under src/ that carries the anesis provider markers; a project without them still gets the package and the route table, and wraps the root itself.",
+					"once": true,
+					"requires_commands": [],
+					"inputs": [],
+					"steps": [
+						{
+							"type": "packages",
+							"dependencies": [
+								"react-router@^7.9.0"
+							]
+						},
+						{
+							"type": "copy",
+							"src": "files/install/routes.tsx",
+							"dest": "src/routes.tsx",
+							"if_exists": "ask"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "glob",
+								"glob": "src/*.[jt]sx"
+							},
+							"content": "import { BrowserRouter } from 'react-router';",
+							"after": "// anesis:top-imports",
+							"if_not_found": "skip"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "glob",
+								"glob": "src/*.[jt]sx"
+							},
+							"content": "    <BrowserRouter>",
+							"after": "{/* anesis:providers-start */}",
+							"if_not_found": "skip"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "glob",
+								"glob": "src/*.[jt]sx"
+							},
+							"content": "    </BrowserRouter>",
+							"before": "{/* anesis:providers-end */}",
+							"if_not_found": "skip"
+						}
+					]
+				}
+			]
+		},
+		{
+			"when": null,
+			"commands": [
+				{
+					"name": "install",
+					"description": "Installs React Router, adds src/routes.jsx, and wraps the app root in a <BrowserRouter>. The wrapping targets every entry file under src/ that carries the anesis provider markers; a project without them still gets the package and the route table, and wraps the root itself.",
+					"once": true,
+					"requires_commands": [],
+					"inputs": [],
+					"steps": [
+						{
+							"type": "packages",
+							"dependencies": [
+								"react-router@^7.9.0"
+							]
+						},
+						{
+							"type": "copy",
+							"src": "files/install/routes.jsx",
+							"dest": "src/routes.jsx",
+							"if_exists": "ask"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "glob",
+								"glob": "src/*.[jt]sx"
+							},
+							"content": "import { BrowserRouter } from 'react-router';",
+							"after": "// anesis:top-imports",
+							"if_not_found": "skip"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "glob",
+								"glob": "src/*.[jt]sx"
+							},
+							"content": "    <BrowserRouter>",
+							"after": "{/* anesis:providers-start */}",
+							"if_not_found": "skip"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "glob",
+								"glob": "src/*.[jt]sx"
+							},
+							"content": "    </BrowserRouter>",
+							"before": "{/* anesis:providers-end */}",
+							"if_not_found": "skip"
+						}
+					]
+				}
+			]
+		}
+	]
+}

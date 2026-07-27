@@ -1,0 +1,75 @@
+{
+	"$schema": "https://anesis-server.onrender.com/schema/anesis.addon.schema.json",
+	"schema_version": "1",
+	"id": "zustand",
+	"name": "Zustand",
+	"version": "0.1.0",
+	"description": "Adds Zustand plus a worked example store under src/stores/. No provider and no root wiring — a Zustand store is a hook, so it works in single-page apps and in Next.js client components alike.",
+	"author": {
+		"name": "Maksym Zhuk",
+		"github": "anesis-dev"
+	},
+	"requires": [],
+	"inputs": [],
+	"detect": [
+		{
+			"id": "typescript",
+			"rules": [
+				{
+					"type": "file_exists",
+					"file": "tsconfig.json"
+				}
+			]
+		}
+	],
+	"variants": [
+		{
+			"when": "typescript",
+			"commands": [
+				{
+					"name": "install",
+					"description": "Installs Zustand and adds src/stores/counter-store.ts",
+					"once": true,
+					"requires_commands": [],
+					"inputs": [],
+					"steps": [
+						{
+							"type": "packages",
+							"dependencies": ["zustand@^5.0.0"]
+						},
+						{
+							"type": "copy",
+							"src": "files/install/counter-store.ts",
+							"dest": "src/stores/counter-store.ts",
+							"if_exists": "ask"
+						}
+					]
+				}
+			]
+		},
+		{
+			"when": null,
+			"commands": [
+				{
+					"name": "install",
+					"description": "Installs Zustand and adds src/stores/counter-store.js",
+					"once": true,
+					"requires_commands": [],
+					"inputs": [],
+					"steps": [
+						{
+							"type": "packages",
+							"dependencies": ["zustand@^5.0.0"]
+						},
+						{
+							"type": "copy",
+							"src": "files/install/counter-store.js",
+							"dest": "src/stores/counter-store.js",
+							"if_exists": "ask"
+						}
+					]
+				}
+			]
+		}
+	]
+}

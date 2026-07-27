@@ -5,7 +5,10 @@
 	"name": "Docker Compose Services",
 	"version": "0.1.0",
 	"description": "Creates a docker-compose.yml and lets you add common dev services on demand (postgres, redis, mongo, rabbitmq, mailpit). Each command injects the service + named volume and auto-fills .env / .env.example with the matching connection variables.",
-	"author": "anesis-dev",
+	"author": {
+		"name": "Maksym Zhuk",
+		"github": "anesis-dev"
+	},
 	"requires": [],
 	"inputs": [],
 	"detect": [],

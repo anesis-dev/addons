@@ -1,0 +1,205 @@
+{
+	"$schema": "https://anesis-server.onrender.com/schema/anesis.addon.schema.json",
+	"schema_version": "1",
+	"id": "tanstack-query",
+	"name": "TanStack Query",
+	"version": "0.1.0",
+	"description": "Adds TanStack Query v5 and mounts its provider at the app root through the template's provider markers. Single-page apps get a shared client; Next.js gets a 'use client' Providers component instead, since a module-level client would be shared across concurrent requests.",
+	"author": {
+		"name": "Maksym Zhuk",
+		"github": "anesis-dev"
+	},
+	"requires": [],
+	"inputs": [],
+	"detect": [
+		{
+			"id": "next",
+			"rules": [
+				{
+					"type": "json_contains",
+					"file": "package.json",
+					"key_path": "dependencies.next"
+				}
+			]
+		},
+		{
+			"id": "typescript",
+			"rules": [
+				{
+					"type": "file_exists",
+					"file": "tsconfig.json"
+				}
+			]
+		}
+	],
+	"variants": [
+		{
+			"when": "next",
+			"commands": [
+				{
+					"name": "install",
+					"description": "Adds a client-side Providers component and wraps the root layout in it",
+					"once": true,
+					"requires_commands": [],
+					"inputs": [],
+					"steps": [
+						{
+							"type": "packages",
+							"dependencies": [
+								"@tanstack/react-query@^5.90.0"
+							]
+						},
+						{
+							"type": "copy",
+							"src": "files/install/providers.tsx",
+							"dest": "src/app/providers.tsx",
+							"if_exists": "ask"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "file",
+								"file": "src/app/layout.tsx"
+							},
+							"content": "import { Providers } from './providers';",
+							"after": "// anesis:top-imports",
+							"if_not_found": "error"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "file",
+								"file": "src/app/layout.tsx"
+							},
+							"content": "        <Providers>",
+							"after": "{/* anesis:providers-start */}",
+							"if_not_found": "error"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "file",
+								"file": "src/app/layout.tsx"
+							},
+							"content": "        </Providers>",
+							"before": "{/* anesis:providers-end */}",
+							"if_not_found": "error"
+						}
+					]
+				}
+			]
+		},
+		{
+			"when": "typescript",
+			"commands": [
+				{
+					"name": "install",
+					"description": "Adds a shared QueryClient in src/lib/query-client.ts and wraps the app root in a QueryClientProvider. The wrapping targets every entry file under src/ that carries the anesis provider markers; a project without them still gets the package and the client, and mounts the provider itself.",
+					"once": true,
+					"requires_commands": [],
+					"inputs": [],
+					"steps": [
+						{
+							"type": "packages",
+							"dependencies": [
+								"@tanstack/react-query@^5.90.0"
+							]
+						},
+						{
+							"type": "copy",
+							"src": "files/install/query-client.ts",
+							"dest": "src/lib/query-client.ts",
+							"if_exists": "ask"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "glob",
+								"glob": "src/*.[jt]sx"
+							},
+							"content": "import { QueryClientProvider } from '@tanstack/react-query';\nimport { queryClient } from './lib/query-client';",
+							"after": "// anesis:top-imports",
+							"if_not_found": "skip"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "glob",
+								"glob": "src/*.[jt]sx"
+							},
+							"content": "    <QueryClientProvider client={queryClient}>",
+							"after": "{/* anesis:providers-start */}",
+							"if_not_found": "skip"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "glob",
+								"glob": "src/*.[jt]sx"
+							},
+							"content": "    </QueryClientProvider>",
+							"before": "{/* anesis:providers-end */}",
+							"if_not_found": "skip"
+						}
+					]
+				}
+			]
+		},
+		{
+			"when": null,
+			"commands": [
+				{
+					"name": "install",
+					"description": "Adds a shared QueryClient in src/lib/query-client.js and wraps the app root in a QueryClientProvider. The wrapping targets every entry file under src/ that carries the anesis provider markers; a project without them still gets the package and the client, and mounts the provider itself.",
+					"once": true,
+					"requires_commands": [],
+					"inputs": [],
+					"steps": [
+						{
+							"type": "packages",
+							"dependencies": [
+								"@tanstack/react-query@^5.90.0"
+							]
+						},
+						{
+							"type": "copy",
+							"src": "files/install/query-client.js",
+							"dest": "src/lib/query-client.js",
+							"if_exists": "ask"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "glob",
+								"glob": "src/*.[jt]sx"
+							},
+							"content": "import { QueryClientProvider } from '@tanstack/react-query';\nimport { queryClient } from './lib/query-client';",
+							"after": "// anesis:top-imports",
+							"if_not_found": "skip"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "glob",
+								"glob": "src/*.[jt]sx"
+							},
+							"content": "    <QueryClientProvider client={queryClient}>",
+							"after": "{/* anesis:providers-start */}",
+							"if_not_found": "skip"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "glob",
+								"glob": "src/*.[jt]sx"
+							},
+							"content": "    </QueryClientProvider>",
+							"before": "{/* anesis:providers-end */}",
+							"if_not_found": "skip"
+						}
+					]
+				}
+			]
+		}
+	]
+}

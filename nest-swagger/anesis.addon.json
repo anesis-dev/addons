@@ -5,7 +5,10 @@
   "name": "Nest Swagger",
   "version": "0.1.0",
   "description": "Adds @nestjs/swagger and exposes Swagger UI at /api in a NestJS project",
-  "author": "anesis-dev",
+  "author": {
+    "name": "Maksym Zhuk",
+    "github": "anesis-dev"
+  },
   "requires": [],
   "inputs": [],
   "detect": [

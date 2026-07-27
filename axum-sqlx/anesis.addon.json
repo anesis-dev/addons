@@ -1,0 +1,142 @@
+{
+	"$schema": "https://anesis-server.onrender.com/schema/anesis.addon.schema.json",
+	"schema_version": "1",
+	"id": "axum-sqlx",
+	"name": "Axum SQLx (PostgreSQL)",
+	"version": "0.1.0",
+	"description": "Adds SQLx with a PostgreSQL pool to an Axum service: the pool becomes a field on AppState, migrations run at startup from ./migrations, and DATABASE_URL is documented in .env.example. Uses rustls, so there is no OpenSSL build dependency.",
+	"author": {
+		"name": "Maksym Zhuk",
+		"github": "anesis-dev"
+	},
+	"requires": [],
+	"inputs": [],
+	"detect": [
+		{
+			"id": "axum",
+			"rules": [
+				{
+					"type": "toml_contains",
+					"file": "Cargo.toml",
+					"key_path": "dependencies.axum"
+				}
+			]
+		}
+	],
+	"variants": [
+		{
+			"when": "axum",
+			"commands": [
+				{
+					"name": "install",
+					"description": "Adds a PgPool to AppState, runs migrations at startup, and exposes GET /health/db",
+					"once": true,
+					"requires_commands": [],
+					"inputs": [],
+					"steps": [
+						{
+							"type": "inject",
+							"target": {
+								"type": "file",
+								"file": "Cargo.toml"
+							},
+							"content": "sqlx = { version = \"0.8.6\", features = [\"runtime-tokio\", \"tls-rustls-ring\", \"postgres\", \"macros\", \"migrate\"] }",
+							"before": "# anesis:dependencies",
+							"if_not_found": "error"
+						},
+						{
+							"type": "copy",
+							"src": "files/install/0001_init.sql",
+							"dest": "migrations/0001_init.sql",
+							"if_exists": "skip"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "file",
+								"file": "src/state.rs"
+							},
+							"content": "use sqlx::PgPool;",
+							"after": "// anesis:top-imports",
+							"if_not_found": "error"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "file",
+								"file": "src/state.rs"
+							},
+							"content": "    pub db: PgPool,",
+							"before": "// anesis:state-fields",
+							"if_not_found": "error"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "file",
+								"file": "src/main.rs"
+							},
+							"content": "    let database_url = env::var(\"DATABASE_URL\").expect(\"DATABASE_URL must be set\");\n    let db = sqlx::PgPool::connect(&database_url)\n        .await\n        .expect(\"could not connect to the database\");\n\n    // Migrations run on boot, so a fresh deploy of a new revision is schema-correct\n    // before it serves its first request.\n    sqlx::migrate!()\n        .run(&db)\n        .await\n        .expect(\"could not apply migrations\");\n",
+							"after": "// anesis:startup",
+							"if_not_found": "error"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "file",
+								"file": "src/main.rs"
+							},
+							"content": "        db,",
+							"before": "// anesis:state-init",
+							"if_not_found": "error"
+						},
+						{
+							"type": "copy",
+							"src": "files/install/db_health.rs",
+							"dest": "src/handlers/db_health.rs",
+							"if_exists": "ask"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "file",
+								"file": "src/handlers/mod.rs"
+							},
+							"content": "mod db_health;",
+							"before": "// anesis:handler-modules",
+							"if_not_found": "error"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "file",
+								"file": "src/handlers/mod.rs"
+							},
+							"content": "pub use db_health::db_health;",
+							"before": "// anesis:handler-exports",
+							"if_not_found": "error"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "file",
+								"file": "src/routers/mod.rs"
+							},
+							"content": "        .route(\"/health/db\", get(handlers::db_health))",
+							"before": "// anesis:routes",
+							"if_not_found": "error"
+						},
+						{
+							"type": "append",
+							"target": {
+								"type": "file",
+								"file": ".env.example"
+							},
+							"content": "\n# PostgreSQL connection string used by SQLx\nDATABASE_URL=postgres://postgres:postgres@localhost:5432/app\n"
+						}
+					]
+				}
+			]
+		}
+	]
+}

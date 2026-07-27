@@ -1,11 +1,14 @@
 {
-    "$schema": "http://localhost:4000/schema/anesis.addon.schema.json",
+    "$schema": "https://anesis-server.onrender.com/schema/anesis.addon.schema.json",
     "schema_version": "1",
     "id": "nest-prisma-v7",
     "name": "Nest Prisma 7",
     "version": "0.5.0",
     "description": "Adds Prisma 7 (PostgreSQL) to a NestJS project: new `prisma-client` generator (CommonJS, generated under src/) plus the @prisma/adapter-pg driver adapter, and a resource generator that replaces `nest g res` — no tests, real DB queries.",
-    "author": "anesis-dev",
+    "author": {
+        "name": "Maksym Zhuk",
+        "github": "anesis-dev"
+    },
     "requires": [],
     "inputs": [],
     "detect": [],

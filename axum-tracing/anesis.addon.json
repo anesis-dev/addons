@@ -1,0 +1,110 @@
+{
+	"$schema": "https://anesis-server.onrender.com/schema/anesis.addon.schema.json",
+	"schema_version": "1",
+	"id": "axum-tracing",
+	"name": "Axum Tracing",
+	"version": "0.1.0",
+	"description": "Adds structured logging to an Axum service: a tracing-subscriber initialised from RUST_LOG, and tower-http's TraceLayer so every request is logged with its method, path, status and latency. Without it an Axum app has no access log at all.",
+	"author": {
+		"name": "Maksym Zhuk",
+		"github": "anesis-dev"
+	},
+	"requires": [],
+	"inputs": [],
+	"detect": [
+		{
+			"id": "axum",
+			"rules": [
+				{
+					"type": "toml_contains",
+					"file": "Cargo.toml",
+					"key_path": "dependencies.axum"
+				}
+			]
+		}
+	],
+	"variants": [
+		{
+			"when": "axum",
+			"commands": [
+				{
+					"name": "install",
+					"description": "Initialises tracing at startup and adds the TraceLayer to the router",
+					"once": true,
+					"requires_commands": [],
+					"inputs": [],
+					"steps": [
+						{
+							"type": "inject",
+							"target": {
+								"type": "file",
+								"file": "Cargo.toml"
+							},
+							"content": "tracing = \"0.1.41\"\ntracing-subscriber = { version = \"0.3.20\", features = [\"env-filter\"] }",
+							"before": "# anesis:dependencies",
+							"if_not_found": "error"
+						},
+						{
+							"type": "replace",
+							"target": {
+								"type": "file",
+								"file": "Cargo.toml"
+							},
+							"find": "tower-http = { version = \"0.6.8\", features = [\"cors\"] }",
+							"replace": "tower-http = { version = \"0.6.8\", features = [\"cors\", \"trace\"] }",
+							"if_not_found": "error"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "file",
+								"file": "src/main.rs"
+							},
+							"content": "use tracing_subscriber::{EnvFilter, fmt};",
+							"after": "// anesis:top-imports",
+							"if_not_found": "error"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "file",
+								"file": "src/main.rs"
+							},
+							"content": "    // RUST_LOG wins; \"info\" keeps a fresh project readable rather than silent.\n    fmt()\n        .with_env_filter(\n            EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new(\"info\")),\n        )\n        .init();",
+							"if_not_found": "error",
+							"before": "// anesis:startup"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "file",
+								"file": "src/routers/mod.rs"
+							},
+							"content": "use tower_http::trace::TraceLayer;",
+							"after": "// anesis:top-imports",
+							"if_not_found": "error"
+						},
+						{
+							"type": "inject",
+							"target": {
+								"type": "file",
+								"file": "src/routers/mod.rs"
+							},
+							"content": "        .layer(TraceLayer::new_for_http())",
+							"before": "// anesis:layers",
+							"if_not_found": "error"
+						},
+						{
+							"type": "append",
+							"target": {
+								"type": "file",
+								"file": ".env.example"
+							},
+							"content": "\n# Log filter, e.g. `info`, `debug`, or `my_crate=debug,tower_http=debug`\nRUST_LOG=info\n"
+						}
+					]
+				}
+			]
+		}
+	]
+}

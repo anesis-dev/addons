@@ -14,8 +14,8 @@ That JSON file is the entire addon — no other files are required unless the ad
   "id": "my-addon",           // must match the directory name
   "name": "My Addon",
   "version": "0.1.0",
-  "description": "...",
-  "author": "anesis-dev",
+  "description": "...",       // 10-300 characters
+  "author": { "name": "Maksym Zhuk", "github": "anesis-dev" },
   "requires": [],             // IDs of addons that must already be installed
   "inputs": [],               // manifest-level inputs (prompted once, shared across all commands)
   "detect": [],               // detection blocks → selects a variant
@@ -171,6 +171,10 @@ Omitting both `after` and `before` prepends the content to the file.
 }
 ```
 
+`if_exists: "ask"` prompts before overwriting. Non-interactively (`--yes`, any
+`--stack` apply, MCP) it resolves to the prompt's own default and keeps the
+user's file — so an addon can use `ask` without becoming unusable in a stack.
+
 ### `packages` — install dependencies with the project's package manager
 
 ```jsonc
@@ -235,20 +239,45 @@ Written to the project root after each successful command run. Tracks which addo
 
 ---
 
-## Typical patterns
+## Injection markers the registry templates provide
 
-### NestJS module registration
+Every template in `anesis-dev/templates` carries the same named anchors, so an
+addon can target them by name instead of pattern-matching the template's own
+code. Inject with `if_not_found: "error"` against these: a missing marker is a
+bug in the template, and silence would ship a half-applied addon.
 
-Templates must have these markers in `src/app.module.ts`:
+| Marker | Where | Inject |
+| --- | --- | --- |
+| `// anesis:top-imports` | entry file, bundler config, `app.module.ts`, `main.rs`, `state.rs`, `routers/mod.rs` | `after` — import statements |
+| `{/* anesis:providers-start */}` / `{/* anesis:providers-end */}` | React entry file (`src/main.*` or `src/index.*`), Next `layout.tsx` | `after` the start and `before` the end — a provider that *wraps* the app |
+| `/* anesis:css-imports */` | `src/index.css` (`src/app/globals.css` on Next) | `after` — `@import` rules |
+| `// anesis:build-plugins` | `vite.config.*`, `rsbuild.config.*`, `farm.config.ts` | `before` — an entry in the `plugins` array |
+| `// anesis:next-config` | `next.config.ts` | `before` — keys on the config object |
+| `// anesis:module-imports` | NestJS `src/app.module.ts` | `before` — module names in `imports: [ ]` |
+| `# anesis:dependencies` | `Cargo.toml` | `before` — crates with their feature lists |
+| `// anesis:modules` | `src/main.rs` | `before` — `mod x;` declarations |
+| `// anesis:startup` | `src/main.rs` | `before` for things that must run first (logging), `after` for the rest |
+| `// anesis:state-fields` / `// anesis:state-init` | `src/state.rs` / `src/main.rs` | `before` — an `AppState` field and its initialiser |
+| `// anesis:routes` / `// anesis:layers` | `src/routers/mod.rs` | `before` — `.route(...)` / `.layer(...)` |
+| `// anesis:handler-modules` / `// anesis:handler-exports` | `src/handlers/mod.rs` | `before` — `mod x;` / `pub use x::x;` |
 
-```ts
-// anesis:top-imports    ← inject import statements after this line
-@Module({
-  imports: [
-    // anesis:module-imports    ← inject module names before this line
-  ],
-})
-```
+### Wrapping vs. inserting
+
+The provider markers are a pair for a reason: an addon that wraps the app opens
+before `providers-start`'s content and closes before `providers-end`, so several
+addons nest correctly no matter what order they were installed in.
+
+Injection order is worth thinking about. `after: "// anesis:startup"` puts your
+content directly below the marker, so a *later* addon's content ends up above
+yours. If your step must run first regardless (initialising logging, for
+example), anchor it with `before` instead.
+
+### Entry files differ by template
+
+React entry files are `src/main.tsx`, `src/main.jsx`, `src/index.tsx` or
+`src/index.jsx` depending on the template. Target them with a glob
+(`src/*.[jt]sx`) and `if_not_found: "skip"`: only the entry file carries the
+markers, so the addon's own `App.tsx` sibling is skipped harmlessly.
 
 ### Adding npm packages
 

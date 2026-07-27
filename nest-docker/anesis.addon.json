@@ -5,7 +5,10 @@
 	"name": "Nest Docker",
 	"version": "0.1.0",
 	"description": "Adds a multi-stage Dockerfile, a docker-compose.yml (app + PostgreSQL) and a .dockerignore so a NestJS project is ready to build and deploy as a container.",
-	"author": "anesis-dev",
+	"author": {
+		"name": "Maksym Zhuk",
+		"github": "anesis-dev"
+	},
 	"requires": [],
 	"inputs": [],
 	"detect": [],
