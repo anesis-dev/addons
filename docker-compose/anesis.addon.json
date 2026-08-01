@@ -254,7 +254,7 @@
 								"type": "file",
 								"file": "docker-compose.yml"
 							},
-							"content": "  mailpit:\n    image: axllent/mailpit:latest\n    restart: unless-stopped\n    ports:\n      - \"1025:1025\"\n      - \"8025:8025\"\n",
+							"content": "  mailpit:\n    image: axllent/mailpit:v1\n    restart: unless-stopped\n    ports:\n      - \"1025:1025\"\n      - \"8025:8025\"\n",
 							"before": "  # anesis:compose-services",
 							"if_not_found": "error"
 						},
