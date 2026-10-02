@@ -3,7 +3,7 @@
 	"schema_version": "1",
 	"id": "docker-compose",
 	"name": "Docker Compose Services",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Creates a docker-compose.yml and lets you add common dev services on demand (postgres, redis, mongo, rabbitmq, mailpit). Each command injects the service + named volume and auto-fills .env / .env.example with the matching connection variables.",
 	"author": {
 		"name": "Maksym Zhuk",
@@ -66,7 +66,7 @@
 								"type": "file",
 								"file": "docker-compose.yml"
 							},
-							"content": "  postgres:\n    image: postgres:17-alpine\n    restart: unless-stopped\n    environment:\n      POSTGRES_USER: ${POSTGRES_USER:-postgres}\n      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}\n      POSTGRES_DB: ${POSTGRES_DB:-app}\n    ports:\n      - \"5432:5432\"\n    volumes:\n      - pgdata:/var/lib/postgresql/data\n    healthcheck:\n      test: [\"CMD-SHELL\", \"pg_isready -U ${POSTGRES_USER:-postgres}\"]\n      interval: 5s\n      timeout: 5s\n      retries: 5\n",
+							"content": "  postgres:\n    image: postgres:18-alpine\n    restart: unless-stopped\n    environment:\n      POSTGRES_USER: ${POSTGRES_USER:-postgres}\n      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}\n      POSTGRES_DB: ${POSTGRES_DB:-app}\n    ports:\n      - \"5432:5432\"\n    volumes:\n      - pgdata:/var/lib/postgresql\n    healthcheck:\n      test: [\"CMD-SHELL\", \"pg_isready -U ${POSTGRES_USER:-postgres}\"]\n      interval: 5s\n      timeout: 5s\n      retries: 5\n",
 							"before": "  # anesis:compose-services",
 							"if_not_found": "error"
 						},
@@ -113,7 +113,7 @@
 								"type": "file",
 								"file": "docker-compose.yml"
 							},
-							"content": "  redis:\n    image: redis:7-alpine\n    restart: unless-stopped\n    ports:\n      - \"6379:6379\"\n    volumes:\n      - redisdata:/data\n    healthcheck:\n      test: [\"CMD\", \"redis-cli\", \"ping\"]\n      interval: 5s\n      timeout: 3s\n      retries: 5\n",
+							"content": "  redis:\n    image: redis:8-alpine\n    restart: unless-stopped\n    ports:\n      - \"6379:6379\"\n    volumes:\n      - redisdata:/data\n    healthcheck:\n      test: [\"CMD\", \"redis-cli\", \"ping\"]\n      interval: 5s\n      timeout: 3s\n      retries: 5\n",
 							"before": "  # anesis:compose-services",
 							"if_not_found": "error"
 						},
@@ -160,7 +160,7 @@
 								"type": "file",
 								"file": "docker-compose.yml"
 							},
-							"content": "  mongo:\n    image: mongo:8\n    restart: unless-stopped\n    environment:\n      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-root}\n      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-root}\n    ports:\n      - \"27017:27017\"\n    volumes:\n      - mongodata:/data/db\n",
+							"content": "  mongo:\n    image: mongo:9\n    restart: unless-stopped\n    environment:\n      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-root}\n      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-root}\n    ports:\n      - \"27017:27017\"\n    volumes:\n      - mongodata:/data/db\n",
 							"before": "  # anesis:compose-services",
 							"if_not_found": "error"
 						},

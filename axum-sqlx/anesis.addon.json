@@ -3,7 +3,7 @@
 	"schema_version": "1",
 	"id": "axum-sqlx",
 	"name": "Axum SQLx (PostgreSQL)",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Adds SQLx with a PostgreSQL pool to an Axum service: the pool becomes a field on AppState, migrations run at startup from ./migrations, and DATABASE_URL is documented in .env.example. Uses rustls, so there is no OpenSSL build dependency.",
 	"author": {
 		"name": "Maksym Zhuk",
@@ -40,7 +40,7 @@
 								"type": "file",
 								"file": "Cargo.toml"
 							},
-							"content": "sqlx = { version = \"0.8.6\", features = [\"runtime-tokio\", \"tls-rustls-ring\", \"postgres\", \"macros\", \"migrate\"] }",
+							"content": "sqlx = { version = \"0.9.0\", features = [\"runtime-tokio\", \"tls-rustls-ring\", \"postgres\", \"macros\", \"migrate\"] }",
 							"before": "# anesis:dependencies",
 							"if_not_found": "error"
 						},

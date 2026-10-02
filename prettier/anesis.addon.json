@@ -3,7 +3,7 @@
 	"schema_version": "1",
 	"id": "prettier",
 	"name": "Prettier",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Adds Prettier with a shared .prettierrc and .prettierignore, plus `format` and `format:check` scripts. Deliberately does not touch the ESLint config: the flat configs these templates ship enable no formatting rules, so the two tools do not overlap.",
 	"author": {
 		"name": "Maksym Zhuk",
@@ -37,7 +37,7 @@
 						{
 							"type": "packages",
 							"dev_dependencies": [
-								"prettier@^3.7.0"
+								"prettier@^3.9.9"
 							]
 						},
 						{
@@ -69,7 +69,7 @@
 						{
 							"type": "packages",
 							"dev_dependencies": [
-								"prettier@^3.7.0"
+								"prettier@^3.9.9"
 							]
 						},
 						{

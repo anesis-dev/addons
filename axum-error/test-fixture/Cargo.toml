@@ -6,9 +6,9 @@ description = "Minimal Axum starter template"
 license = "MIT"
 
 [dependencies]
-axum = "0.8.8"
+axum = "0.8.9"
 dotenvy = "0.15.7"
-serde = { version = "1.0.228", features = ["derive"] }
-tokio = { version = "1.51.0", features = ["macros", "net", "rt-multi-thread"] }
-tower-http = { version = "0.6.8", features = ["cors"] }
+serde = { version = "1.0.229", features = ["derive"] }
+tokio = { version = "1.53.1", features = ["macros", "net", "rt-multi-thread"] }
+tower-http = { version = "0.7.1", features = ["cors"] }
 # anesis:dependencies

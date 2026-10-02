@@ -3,7 +3,7 @@
 	"schema_version": "1",
 	"id": "axum-error",
 	"name": "Axum Error Handling",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Adds a single AppError type with an IntoResponse impl, so handlers can use `?` and still return the right status and a consistent JSON error body. Internal causes are logged rather than returned, keeping database and upstream detail out of responses.",
 	"author": {
 		"name": "Maksym Zhuk",
@@ -40,7 +40,7 @@
 								"type": "file",
 								"file": "Cargo.toml"
 							},
-							"content": "anyhow = \"1.0.100\"\nthiserror = \"2.0.17\"",
+							"content": "anyhow = \"1.0.104\"\nthiserror = \"2.0.21\"",
 							"before": "# anesis:dependencies",
 							"if_not_found": "error"
 						},

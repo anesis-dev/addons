@@ -3,7 +3,7 @@
 	"schema_version": "1",
 	"id": "react-router",
 	"name": "React Router",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Adds React Router v7 in declarative mode: wraps the app root in a <BrowserRouter> through the template's provider markers, and drops a routes file (.tsx or .jsx, matching the project) with a home route and a catch-all. For single-page apps — Next.js has its own router.",
 	"author": {
 		"name": "Maksym Zhuk",
@@ -36,7 +36,7 @@
 						{
 							"type": "packages",
 							"dependencies": [
-								"react-router@^7.9.0"
+								"react-router@^8.4.0"
 							]
 						},
 						{
@@ -92,7 +92,7 @@
 						{
 							"type": "packages",
 							"dependencies": [
-								"react-router@^7.9.0"
+								"react-router@^8.4.0"
 							]
 						},
 						{

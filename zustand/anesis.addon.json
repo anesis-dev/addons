@@ -3,7 +3,7 @@
 	"schema_version": "1",
 	"id": "zustand",
 	"name": "Zustand",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Adds Zustand plus a worked example store under src/stores/. No provider and no root wiring — a Zustand store is a hook, so it works in single-page apps and in Next.js client components alike.",
 	"author": {
 		"name": "Maksym Zhuk",
@@ -35,7 +35,7 @@
 					"steps": [
 						{
 							"type": "packages",
-							"dependencies": ["zustand@^5.0.0"]
+							"dependencies": ["zustand@^5.0.15"]
 						},
 						{
 							"type": "copy",
@@ -59,7 +59,7 @@
 					"steps": [
 						{
 							"type": "packages",
-							"dependencies": ["zustand@^5.0.0"]
+							"dependencies": ["zustand@^5.0.15"]
 						},
 						{
 							"type": "copy",

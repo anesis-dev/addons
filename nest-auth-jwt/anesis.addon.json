@@ -3,7 +3,7 @@
     "schema_version": "1",
     "id": "nest-auth-jwt",
     "name": "Nest JWT Auth (cookies + refresh)",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Cookie-based JWT auth for NestJS: register/login/me/logout/refresh, argon2 hashing, Passport access + refresh strategies, a global AccessTokenGuard with @Public() bypass, and a User Prisma model. Requires nest-prisma-v7 and nest-validation. Overwrites user.prisma for the required shape.",
     "author": {
         "name": "Maksym Zhuk",
@@ -26,10 +26,10 @@
                         {
                             "type": "packages",
                             "dependencies": [
-                                "@nestjs/jwt@^11.0.2",
-                                "@nestjs/passport@^11.0.5",
+                                "@nestjs/jwt@^12.0.2",
+                                "@nestjs/passport@^12.0.0",
                                 "passport-jwt@^4.0.1",
-                                "argon2@^0.44.0",
+                                "argon2@^0.45.1",
                                 "cookie-parser@^1.4.7"
                             ],
                             "dev_dependencies": [

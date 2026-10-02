@@ -3,7 +3,7 @@
 	"schema_version": "1",
 	"id": "tanstack-query",
 	"name": "TanStack Query",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Adds TanStack Query v5 and mounts its provider at the app root through the template's provider markers. Single-page apps get a shared client; Next.js gets a 'use client' Providers component instead, since a module-level client would be shared across concurrent requests.",
 	"author": {
 		"name": "Maksym Zhuk",
@@ -46,7 +46,7 @@
 						{
 							"type": "packages",
 							"dependencies": [
-								"@tanstack/react-query@^5.90.0"
+								"@tanstack/react-query@^5.104.1"
 							]
 						},
 						{
@@ -102,7 +102,7 @@
 						{
 							"type": "packages",
 							"dependencies": [
-								"@tanstack/react-query@^5.90.0"
+								"@tanstack/react-query@^5.104.1"
 							]
 						},
 						{
@@ -158,7 +158,7 @@
 						{
 							"type": "packages",
 							"dependencies": [
-								"@tanstack/react-query@^5.90.0"
+								"@tanstack/react-query@^5.104.1"
 							]
 						},
 						{

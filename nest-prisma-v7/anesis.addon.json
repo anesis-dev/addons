@@ -3,7 +3,7 @@
     "schema_version": "1",
     "id": "nest-prisma-v7",
     "name": "Nest Prisma 7",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Adds Prisma 7 (PostgreSQL) to a NestJS project: new `prisma-client` generator (CommonJS, generated under src/) plus the @prisma/adapter-pg driver adapter, and a resource generator that replaces `nest g res` — no tests, real DB queries.",
     "author": {
         "name": "Maksym Zhuk",
@@ -26,16 +26,16 @@
                         {
                             "type": "packages",
                             "dependencies": [
-                                "@prisma/client@^7.0.0",
-                                "@prisma/adapter-pg@^7.0.0",
-                                "pg@^8.13.0",
-                                "@nestjs/mapped-types@^2.1.0",
+                                "@prisma/client@^7.10.0",
+                                "@prisma/adapter-pg@^7.10.0",
+                                "pg@^8.23.1",
+                                "@nestjs/mapped-types@^12.0.0",
                                 "@nestjs/config",
                                 "dotenv"
                             ],
                             "dev_dependencies": [
-                                "prisma@^7.0.0",
-                                "@types/pg@^8.11.10"
+                                "prisma@^7.10.0",
+                                "@types/pg@^8.23.1"
                             ]
                         },
                         {

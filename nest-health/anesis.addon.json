@@ -3,7 +3,7 @@
 	"schema_version": "1",
 	"id": "nest-health",
 	"name": "Nest Health",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Adds @nestjs/terminus and a /health endpoint with a memory check — ready-made liveness/readiness probe for deployments.",
 	"author": {
 		"name": "Maksym Zhuk",
@@ -25,7 +25,7 @@
 					"steps": [
 						{
 							"type": "packages",
-							"dependencies": ["@nestjs/terminus@^11.0.0"]
+							"dependencies": ["@nestjs/terminus@^12.1.0"]
 						},
 						{
 							"type": "copy",
